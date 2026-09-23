@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronsUpDown, LogOut, Plus, UserRound } from "lucide-react";
+import { ChevronsUpDown, LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
