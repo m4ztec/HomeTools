@@ -6,7 +6,7 @@ import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAddItem, useAllItems, useHomes, useItems } from "@/hooks/useHomes";
-import { attentionScore, currency, isExpiringSoon, isLow } from "@/lib/inventory";
+import { attentionScore, currency, isExpiringSoon, isLow, SELECTED_HOME_KEY } from "@/lib/inventory";
 import { ItemRow } from "@/components/pantry/ItemRow";
 import { ItemEditor } from "@/components/pantry/ItemEditor";
 import { HouseholdPanel } from "@/components/pantry/HouseholdPanel";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/app")({
   component: AppPage,
 });
 
-const STORAGE_KEY = "pantry:selected-home";
+const STORAGE_KEY = SELECTED_HOME_KEY;
 
 function AppPage() {
   const { user } = Route.useRouteContext();
