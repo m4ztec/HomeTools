@@ -1,0 +1,80 @@
+import { useState, type FormEvent, type ReactNode } from "react";
+import { CATEGORIES, type Item } from "@/lib/inventory";
+import type { ItemInput } from "@/hooks/useHomes";
+
+type Props = {
+  initial?: Partial<Item>;
+  submitLabel: string;
+  busy?: boolean;
+  onSubmit: (values: ItemInput) => void;
+  extra?: ReactNode;
+};
+
+export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Props) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [category, setCategory] = useState(initial?.category ?? "Pantry");
+  const [price, setPrice] = useState(initial?.price != null ? String(initial.price) : "");
+  const [quantity, setQuantity] = useState(initial?.quantity != null ? String(initial.quantity) : "");
+  const [target, setTarget] = useState(initial?.target_quantity != null ? String(initial.target_quantity) : "");
+  const [perishable, setPerishable] = useState(!!initial?.expires_at);
+  const [expires, setExpires] = useState(initial?.expires_at ?? "");
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    onSubmit({
+      name: name.trim(),
+      category,
+      price: Number(price) || 0,
+      quantity: Math.max(0, parseInt(quantity, 10) || 0),
+      target_quantity: Math.max(0, parseInt(target, 10) || 0),
+      expires_at: perishable && expires ? expires : null,
+    });
+    if (!initial?.id) {
+      setName(""); setPrice(""); setQuantity(""); setTarget(""); setExpires(""); setPerishable(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div>
+        <label className="text-xs text-mist">Name</label>
+        <input className="field mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Oat milk" required />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-mist">Price (€)</label>
+          <input className="field mt-1" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" />
+        </div>
+        <div>
+          <label className="text-xs text-mist">Category</label>
+          <select className="field mt-1" value={category} onChange={(e) => setCategory(e.target.value)}>
+            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-mist">Have</label>
+          <input className="field mt-1" inputMode="numeric" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0" />
+        </div>
+        <div>
+          <label className="text-xs text-mist">Want to keep</label>
+          <input className="field mt-1" inputMode="numeric" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="0" />
+        </div>
+      </div>
+      <div>
+        <label className="flex items-center gap-2 text-xs text-mist">
+          <input type="checkbox" className="accent-glow" checked={perishable} onChange={(e) => setPerishable(e.target.checked)} />
+          Perishable — has an expiry date
+        </label>
+        {perishable && (
+          <input type="date" className="field mt-2" value={expires} onChange={(e) => setExpires(e.target.value)} required />
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <button type="submit" className="btn-glow flex-1" disabled={busy || !name.trim()}>{busy ? "Saving…" : submitLabel}</button>
+        {extra}
+      </div>
+    </form>
+  );
+}
