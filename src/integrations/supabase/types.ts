@@ -14,13 +14,148 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      home_members: {
+        Row: {
+          home_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          home_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          home_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_members_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          invite_code: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          invite_code?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          invite_code?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      items: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          home_id: string
+          id: string
+          name: string
+          price: number
+          quantity: number
+          target_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          home_id: string
+          id?: string
+          name: string
+          price?: number
+          quantity?: number
+          target_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          home_id?: string
+          id?: string
+          name?: string
+          price?: number
+          quantity?: number
+          target_quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_home_member: {
+        Args: { _home_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_home_owner: {
+        Args: { _home_id: string; _user_id: string }
+        Returns: boolean
+      }
+      join_home_by_code: { Args: { _code: string }; Returns: string }
+      shares_home_with: {
+        Args: { _other: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
