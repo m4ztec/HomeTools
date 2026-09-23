@@ -50,7 +50,7 @@ function AppPage() {
   const sorted = useMemo(() => [...items].sort((a, b) => attentionScore(a) - attentionScore(b) || a.name.localeCompare(b.name)), [items]);
   const low = items.filter(isLow).length;
   const expiring = items.filter((i) => isExpiringSoon(i)).length;
-  const total = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+  const total = items.reduce((s, i) => s + Number(i.price) * i.qty, 0);
 
   async function signOut() {
     await queryClient.cancelQueries();
