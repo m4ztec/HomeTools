@@ -3,6 +3,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronsUpDown, LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAddItem, useAllItems, useHomes, useItems } from "@/hooks/useHomes";
@@ -66,11 +75,11 @@ function AppPage() {
     <div className="ambient min-h-screen">
       <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow">P</div>
-            <div>
-              <h1 className="text-xl font-semibold leading-none">Pantry</h1>
-              <p className="mt-1 text-xs text-mist">Household stock, kept in order</p>
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-semibold leading-none">{home?.name ?? "Pantry"}</h1>
+              <p className="mt-1 text-xs text-mist">{home ? "Pantry · Household inventory" : "Household stock, kept in order"}</p>
             </div>
           </div>
 
@@ -96,13 +105,26 @@ function AppPage() {
             <button type="button" onClick={() => setShowSetup((v) => !v)} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Add or join a home" title="Add or join a home">
               <Plus className="size-4" />
             </button>
-            <button type="button" onClick={() => setShowProfile(true)} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Edit profile" title="Edit profile">
-              <UserRound className="size-4" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="glass rounded-full text-mist hover:text-foreground" aria-label="Open account menu" title="Account">
+                  <UserRound className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass w-52 rounded-xl border-foreground/10 p-1.5">
+                <DropdownMenuLabel className="truncate px-2 py-2 text-xs font-normal text-mist">{user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-foreground/10" />
+                <DropdownMenuItem className="cursor-pointer rounded-lg py-2" onSelect={() => setShowProfile(true)}>
+                  <UserRound className="size-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer rounded-lg py-2 text-rose focus:text-rose" onSelect={() => void signOut()}>
+                  <LogOut className="size-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {showProfile && <ProfileDialog userId={user.id} email={user.email ?? ""} onClose={() => setShowProfile(false)} />}
-            <button type="button" onClick={signOut} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Sign out" title="Sign out">
-              <LogOut className="size-4" />
-            </button>
           </div>
         </header>
 
