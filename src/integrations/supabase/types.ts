@@ -80,8 +80,11 @@ export type Database = {
           id: string
           name: string
           price: number
+          qty: number
           quantity: number
+          target_qty: number
           target_quantity: number
+          unit: string
           updated_at: string
         }
         Insert: {
@@ -93,8 +96,11 @@ export type Database = {
           id?: string
           name: string
           price?: number
+          qty?: number
           quantity?: number
+          target_qty?: number
           target_quantity?: number
+          unit?: string
           updated_at?: string
         }
         Update: {
@@ -106,8 +112,11 @@ export type Database = {
           id?: string
           name?: string
           price?: number
+          qty?: number
           quantity?: number
+          target_qty?: number
           target_quantity?: number
+          unit?: string
           updated_at?: string
         }
         Relationships: [

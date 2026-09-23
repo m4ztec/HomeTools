@@ -15,6 +15,13 @@
       "when": 1790177714875,
       "tag": "0001_homes_creator_read",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790178069575,
+      "tag": "0002_add_decimal_quantities_and_unit",
+      "breakpoints": true
     }
   ]
 }

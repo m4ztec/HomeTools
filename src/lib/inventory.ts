@@ -6,11 +6,21 @@ export type Home = Tables<"homes">;
 export type Profile = Tables<"profiles">;
 
 export const CATEGORIES = ["Dairy", "Pantry", "Produce", "Frozen", "Household", "Bathroom", "Other"] as const;
+export const UNITS = ["pcs", "kg", "g", "L", "ml", "pack"] as const;
 
 export const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
 
+/** Format a quantity without trailing zeros: 0.7 -> "0.7", 2 -> "2". */
+export function formatQty(q: number) {
+  return Number(q.toFixed(2)).toString();
+}
+
+export function qtyStep(unit: string) {
+  return unit === "pcs" || unit === "pack" ? 1 : 0.1;
+}
+
 export function isLow(item: Item) {
-  return item.quantity < item.target_quantity;
+  return item.qty < item.target_qty;
 }
 
 export function daysUntilExpiry(item: Item): number | null {
@@ -38,6 +48,6 @@ export function attentionScore(item: Item) {
   let score = 0;
   if (d !== null && d < 0) score -= 1000;
   else if (d !== null && d <= 3) score -= 500 + (3 - d);
-  if (isLow(item)) score -= 100 + (item.target_quantity - item.quantity);
+  if (isLow(item)) score -= 100 + (item.target_qty - item.qty);
   return score;
 }

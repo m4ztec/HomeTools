@@ -93,8 +93,9 @@ export type ItemInput = {
   name: string;
   category: string;
   price: number;
-  quantity: number;
-  target_quantity: number;
+  unit: string;
+  qty: number;
+  target_qty: number;
   expires_at: string | null;
 };
 
