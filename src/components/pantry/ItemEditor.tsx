@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { CATEGORIES, type Item } from "@/lib/inventory";
+import { CATEGORIES, UNITS, type Item } from "@/lib/inventory";
 import type { ItemInput } from "@/hooks/useHomes";
 
 type Props = {
@@ -14,8 +14,9 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
   const [name, setName] = useState(initial?.name ?? "");
   const [category, setCategory] = useState(initial?.category ?? "Pantry");
   const [price, setPrice] = useState(initial?.price != null ? String(initial.price) : "");
-  const [quantity, setQuantity] = useState(initial?.quantity != null ? String(initial.quantity) : "");
-  const [target, setTarget] = useState(initial?.target_quantity != null ? String(initial.target_quantity) : "");
+  const [unit, setUnit] = useState(initial?.unit ?? "pcs");
+  const [qty, setQty] = useState(initial?.qty != null ? String(initial.qty) : "");
+  const [target, setTarget] = useState(initial?.target_qty != null ? String(initial.target_qty) : "");
   const [perishable, setPerishable] = useState(!!initial?.expires_at);
   const [expires, setExpires] = useState(initial?.expires_at ?? "");
 
@@ -25,12 +26,13 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
       name: name.trim(),
       category,
       price: Number(price) || 0,
-      quantity: Math.max(0, parseInt(quantity, 10) || 0),
-      target_quantity: Math.max(0, parseInt(target, 10) || 0),
+      unit,
+      qty: Math.max(0, parseFloat(qty) || 0),
+      target_qty: Math.max(0, parseFloat(target) || 0),
       expires_at: perishable && expires ? expires : null,
     });
     if (!initial?.id) {
-      setName(""); setPrice(""); setQuantity(""); setTarget(""); setExpires(""); setPerishable(false);
+      setName(""); setPrice(""); setQty(""); setTarget(""); setExpires(""); setPerishable(false); setUnit("pcs");
     }
   }
 
@@ -38,12 +40,18 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
         <label className="text-xs text-mist">Name</label>
-        <input className="field mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Oat milk" required />
+        <input className="field mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Flour" required />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <label className="text-xs text-mist">Price (€)</label>
           <input className="field mt-1" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" />
+        </div>
+        <div>
+          <label className="text-xs text-mist">Unit</label>
+          <select className="field mt-1" value={unit} onChange={(e) => setUnit(e.target.value)}>
+            {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
         </div>
         <div>
           <label className="text-xs text-mist">Category</label>
@@ -54,12 +62,12 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs text-mist">Have</label>
-          <input className="field mt-1" inputMode="numeric" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0" />
+          <label className="text-xs text-mist">Have ({unit})</label>
+          <input className="field mt-1" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="0.7" />
         </div>
         <div>
-          <label className="text-xs text-mist">Want to keep</label>
-          <input className="field mt-1" inputMode="numeric" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="0" />
+          <label className="text-xs text-mist">Want to keep ({unit})</label>
+          <input className="field mt-1" inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="1" />
         </div>
       </div>
       <div>
