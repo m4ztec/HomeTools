@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { LogOut, Plus, UserRound } from "lucide-react";
+import { ChevronsUpDown, LogOut, Plus, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,17 +76,18 @@ function AppPage() {
 
           <div className="flex items-center gap-2">
             {homes.length > 0 && (
-              <div className="glass flex max-w-[70vw] items-center gap-1 overflow-x-auto rounded-full p-1">
-                {homes.map((h) => (
-                  <button
-                    key={h.id}
-                    type="button"
-                    onClick={() => setSelected(h.id)}
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${h.id === homeId ? "bg-foreground/10 text-foreground" : "text-mist hover:text-foreground"}`}
-                  >
-                    {h.name}
-                  </button>
-                ))}
+              <div className="glass relative flex items-center rounded-full">
+                <select
+                  value={homeId ?? ""}
+                  onChange={(e) => setSelected(e.target.value)}
+                  aria-label="Choose a home"
+                  className="w-36 appearance-none truncate rounded-full bg-transparent py-1.5 pl-3 pr-8 text-sm font-medium outline-none sm:w-44"
+                >
+                  {homes.map((h) => (
+                    <option key={h.id} value={h.id}>{h.name}</option>
+                  ))}
+                </select>
+                <ChevronsUpDown className="pointer-events-none absolute right-2.5 size-3.5 text-mist" />
               </div>
             )}
             <button type="button" onClick={() => setShowSetup((v) => !v)} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Add or join a home" title="Add or join a home">
