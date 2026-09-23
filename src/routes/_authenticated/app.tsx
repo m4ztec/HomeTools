@@ -5,12 +5,13 @@ import { LogOut, Plus, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAddItem, useHomes, useItems } from "@/hooks/useHomes";
+import { useAddItem, useAllItems, useHomes, useItems } from "@/hooks/useHomes";
 import { attentionScore, currency, isExpiringSoon, isLow } from "@/lib/inventory";
 import { ItemRow } from "@/components/pantry/ItemRow";
 import { ItemEditor } from "@/components/pantry/ItemEditor";
 import { HouseholdPanel } from "@/components/pantry/HouseholdPanel";
 import { HomeSetup } from "@/components/pantry/HomeSetup";
+import { ShoppingList } from "@/components/pantry/ShoppingList";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({
@@ -46,6 +47,8 @@ function AppPage() {
 
   const { data: items = [] } = useItems(homeId);
   const addItem = useAddItem(homeId);
+  const homeIds = useMemo(() => homes.map((h) => h.id), [homes]);
+  const { data: allItems = [] } = useAllItems(homeIds);
 
   const sorted = useMemo(() => [...items].sort((a, b) => attentionScore(a) - attentionScore(b) || a.name.localeCompare(b.name)), [items]);
   const low = items.filter(isLow).length;
@@ -149,6 +152,10 @@ function AppPage() {
                 <HouseholdPanel home={home} currentUserId={user.id} onLeft={() => setSelected(null)} />
               </div>
             </div>
+
+            <section className="mt-4">
+              <ShoppingList items={allItems} homes={homes} />
+            </section>
           </>
         )}
       </div>
