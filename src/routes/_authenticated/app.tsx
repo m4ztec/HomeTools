@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { LogOut, Plus } from "lucide-react";
+import { LogOut, Plus, UserRound } from "lucide-react";
+import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAddItem, useHomes, useItems } from "@/hooks/useHomes";
@@ -34,6 +35,7 @@ function AppPage() {
   const { data: homes = [], isLoading } = useHomes();
   const [selected, setSelected] = useState<string | null>(() => (typeof window === "undefined" ? null : localStorage.getItem(STORAGE_KEY)));
   const [showSetup, setShowSetup] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const homeId = homes.some((h) => h.id === selected) ? selected : (homes[0]?.id ?? null);
   const home = homes.find((h) => h.id === homeId) ?? null;
@@ -87,6 +89,10 @@ function AppPage() {
             <button type="button" onClick={() => setShowSetup((v) => !v)} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Add or join a home" title="Add or join a home">
               <Plus className="size-4" />
             </button>
+            <button type="button" onClick={() => setShowProfile(true)} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Edit profile" title="Edit profile">
+              <UserRound className="size-4" />
+            </button>
+            {showProfile && <ProfileDialog userId={user.id} email={user.email ?? ""} onClose={() => setShowProfile(false)} />}
             <button type="button" onClick={signOut} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Sign out" title="Sign out">
               <LogOut className="size-4" />
             </button>
