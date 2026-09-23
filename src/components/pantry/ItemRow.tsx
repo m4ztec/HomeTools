@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { currency, daysUntilExpiry, expiryLabel, formatQty, isLow, qtyStep, type Item } from "@/lib/inventory";
 import { useDeleteItem, useUpdateItem } from "@/hooks/useHomes";
@@ -37,6 +37,15 @@ export function ItemRow({ item }: { item: Item }) {
           <button type="button" className="qty-btn" aria-label={`Increase ${item.name}`} onClick={() => setQty(item.qty + step)}>+</button>
           <span className="mx-1 text-xs text-mist">/</span>
           <span className="min-w-8 text-center text-sm font-medium text-mist" title="Target quantity">{formatQty(item.target_qty)}</span>
+          <button
+            type="button"
+            className="qty-btn ml-2"
+            aria-label={`Edit ${item.name}`}
+            title="Edit item"
+            onClick={() => setEditing((v) => !v)}
+          >
+            <Pencil className="size-3.5" />
+          </button>
         </div>
       </div>
       {editing && (
