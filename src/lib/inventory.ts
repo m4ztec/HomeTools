@@ -10,6 +10,8 @@ export const UNITS = ["pcs", "kg", "g", "L", "ml", "pack"] as const;
 
 export const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
 
+export const SELECTED_HOME_KEY = "pantry:selected-home";
+
 /** Format a quantity without trailing zeros: 0.7 -> "0.7", 2 -> "2". */
 export function formatQty(q: number) {
   return Number(q.toFixed(2)).toString();

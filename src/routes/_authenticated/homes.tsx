@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { ArrowRight, Home as HomeIcon } from "lucide-react";
 import { useAllItems, useHomes } from "@/hooks/useHomes";
-import { currency, isExpiringSoon, isLow, type Item } from "@/lib/inventory";
+import { currency, isExpiringSoon, isLow, SELECTED_HOME_KEY, type Item } from "@/lib/inventory";
 import { ShoppingList } from "@/components/pantry/ShoppingList";
 
 export const Route = createFileRoute("/_authenticated/homes")({
@@ -63,7 +63,12 @@ function HomesPage() {
                 const expiring = list.filter((i) => isExpiringSoon(i)).length;
                 const value = list.reduce((s, i) => s + Number(i.price) * i.qty, 0);
                 return (
-                  <div key={home.id} className="glass rounded-3xl p-5">
+                  <Link
+                    key={home.id}
+                    to="/app"
+                    onClick={() => localStorage.setItem(SELECTED_HOME_KEY, home.id)}
+                    className="glass block rounded-3xl p-5 transition-colors hover:ring-1 hover:ring-glow/40"
+                  >
                     <div className="flex items-center gap-2">
                       <HomeIcon className="size-4 text-glow" />
                       <h2 className="truncate font-semibold">{home.name}</h2>
@@ -83,7 +88,7 @@ function HomesPage() {
                       </div>
                     </div>
                     <p className="mt-3 text-xs text-mist">Stock value: {currency.format(value)}</p>
-                  </div>
+                  </Link>
                 );
               })}
             </section>
