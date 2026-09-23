@@ -26,6 +26,19 @@ export function useItems(homeId: string | null) {
   });
 }
 
+export function useAllItems(homeIds: string[]) {
+  const key = [...homeIds].sort().join(",");
+  return useQuery({
+    queryKey: ["items", "all", key],
+    enabled: homeIds.length > 0,
+    queryFn: async (): Promise<Item[]> => {
+      const { data, error } = await supabase.from("items").select("*").in("home_id", homeIds).order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export type Member = { user_id: string; role: string; display_name: string };
 
 export function useMembers(homeId: string | null) {
