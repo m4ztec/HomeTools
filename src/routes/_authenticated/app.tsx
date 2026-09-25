@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronsUpDown, LayoutGrid, LogOut, Plus, UserRound } from "lucide-react";
+import { ChevronsUpDown, LogOut, Plus, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -84,9 +84,6 @@ function AppPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link to="/homes" className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Homes overview" title="Homes overview">
-              <LayoutGrid className="size-4" />
-            </Link>
             {homes.length > 0 && (
               <div className="glass relative flex items-center rounded-full">
                 <select
