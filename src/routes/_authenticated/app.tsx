@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronsUpDown, LogOut, Plus, UserRound } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,6 @@ function AppPage() {
   const queryClient = useQueryClient();
   const { data: homes = [], isLoading } = useHomes();
   const [selected, setSelected] = useState<string | null>(() => (typeof window === "undefined" ? null : localStorage.getItem(STORAGE_KEY)));
-  const [showSetup, setShowSetup] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
   const homeId = homes.some((h) => h.id === selected) ? selected : (homes[0]?.id ?? null);
@@ -99,9 +98,6 @@ function AppPage() {
                 <ChevronsUpDown className="pointer-events-none absolute right-2.5 size-3.5 text-mist" />
               </div>
             )}
-            <button type="button" onClick={() => setShowSetup((v) => !v)} className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Add or join a home" title="Add or join a home">
-              <Plus className="size-4" />
-            </button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="glass rounded-full text-mist hover:text-foreground" aria-label="Open account menu" title="Account">
@@ -125,15 +121,13 @@ function AppPage() {
           </div>
         </header>
 
-        {(showSetup || (!isLoading && homes.length === 0)) && (
+        {!isLoading && homes.length === 0 && (
           <section className="mt-6">
-            {homes.length === 0 && (
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold">Welcome{user.user_metadata?.["display_name"] ? `, ${user.user_metadata["display_name"]}` : ""}</h2>
-                <p className="text-sm text-mist">Start by creating your first home, or join one someone shared with you.</p>
-              </div>
-            )}
-            <HomeSetup onDone={(id) => { setSelected(id); setShowSetup(false); }} />
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold">Welcome{user.user_metadata?.["display_name"] ? `, ${user.user_metadata["display_name"]}` : ""}</h2>
+              <p className="text-sm text-mist">Start by creating your first home, or join one someone shared with you.</p>
+            </div>
+            <HomeSetup onDone={(id) => setSelected(id)} />
           </section>
         )}
 
