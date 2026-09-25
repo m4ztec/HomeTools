@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { Home as HomeIcon } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Home as HomeIcon, Plus } from "lucide-react";
 import { useAllItems, useHomes } from "@/hooks/useHomes";
 import { currency, isExpiringSoon, isLow, SELECTED_HOME_KEY, type Item } from "@/lib/inventory";
 import { ShoppingList } from "@/components/pantry/ShoppingList";
+import { HomeSetup } from "@/components/pantry/HomeSetup";
 
 export const Route = createFileRoute("/_authenticated/homes")({
   head: () => ({
@@ -20,9 +21,11 @@ export const Route = createFileRoute("/_authenticated/homes")({
 });
 
 function HomesPage() {
+  const navigate = useNavigate();
   const { data: homes = [] } = useHomes();
   const homeIds = useMemo(() => homes.map((h) => h.id), [homes]);
   const { data: items = [] } = useAllItems(homeIds);
+  const [showSetup, setShowSetup] = useState(false);
 
   const byHome = useMemo(() => {
     const map = new Map<string, Item[]>();
@@ -33,6 +36,11 @@ function HomesPage() {
     }
     return map;
   }, [items]);
+
+  function openHome(id: string) {
+    localStorage.setItem(SELECTED_HOME_KEY, id);
+    navigate({ to: "/app" });
+  }
 
   return (
     <div className="ambient min-h-screen">
@@ -45,11 +53,26 @@ function HomesPage() {
               <p className="mt-1 text-xs text-mist">Everything at a glance</p>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setShowSetup((v) => !v)}
+            className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground"
+            aria-label="Add or join a home"
+            title="Add or join a home"
+          >
+            <Plus className="size-4" />
+          </button>
         </header>
+
+        {showSetup && (
+          <section className="mt-6">
+            <HomeSetup onDone={openHome} />
+          </section>
+        )}
 
         {homes.length === 0 ? (
           <section className="glass mt-6 rounded-3xl p-8 text-center">
-            <p className="text-sm text-mist">You're not in any home yet — create or join one from the ledger.</p>
+            <p className="text-sm text-mist">You're not in any home yet — create or join one above.</p>
           </section>
         ) : (
           <>
