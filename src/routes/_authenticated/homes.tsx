@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { ArrowRight, Home as HomeIcon } from "lucide-react";
+import { Home as HomeIcon } from "lucide-react";
 import { useAllItems, useHomes } from "@/hooks/useHomes";
 import { currency, isExpiringSoon, isLow, SELECTED_HOME_KEY, type Item } from "@/lib/inventory";
 import { ShoppingList } from "@/components/pantry/ShoppingList";
@@ -45,9 +45,6 @@ function HomesPage() {
               <p className="mt-1 text-xs text-mist">Everything at a glance</p>
             </div>
           </div>
-          <Link to="/app" className="btn-ghost flex items-center gap-2 text-sm">
-            Open ledger <ArrowRight className="size-4" />
-          </Link>
         </header>
 
         {homes.length === 0 ? (
