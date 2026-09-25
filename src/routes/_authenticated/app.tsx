@@ -76,7 +76,7 @@ function AppPage() {
       <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow">P</div>
+            <Link to="/homes" className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow transition-colors hover:ring-1 hover:ring-glow/40" aria-label="Homes overview" title="Homes overview">P</Link>
             <div className="min-w-0">
               <h1 className="truncate text-xl font-semibold leading-none">{home?.name ?? "Pantry"}</h1>
               <p className="mt-1 text-xs text-mist">{home ? "Pantry · Household inventory" : "Household stock, kept in order"}</p>

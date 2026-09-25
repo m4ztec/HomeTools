@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useSession } from "@/hooks/useSession";
 
 export const Route = createFileRoute("/")({
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { user, loading } = useSession();
+
+  if (!loading && user) return <Navigate to="/homes" replace />;
 
   return (
     <div className="ambient min-h-screen">
