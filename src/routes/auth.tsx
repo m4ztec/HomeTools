@@ -35,7 +35,7 @@ function AuthPage() {
   const isSignup = mode === "signup";
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/app", replace: true });
+    if (!loading && user) navigate({ to: "/homes", replace: true });
   }, [user, loading, navigate]);
 
   async function onSubmit(e: FormEvent) {
@@ -53,7 +53,7 @@ function AuthPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/app", replace: true });
+        navigate({ to: "/homes", replace: true });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
