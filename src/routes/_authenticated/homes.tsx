@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Home as HomeIcon, Plus } from "lucide-react";
+import { Home as HomeIcon, Plus, Shield } from "lucide-react";
 import { useAllItems, useHomes } from "@/hooks/useHomes";
 import { currency, isExpiringSoon, isLow, SELECTED_HOME_KEY, type Item } from "@/lib/inventory";
 import { ShoppingList } from "@/components/pantry/ShoppingList";
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/homes")({
 });
 
 function HomesPage() {
+  const { isAdmin } = Route.useRouteContext();
   const navigate = useNavigate();
   const { data: homes = [] } = useHomes();
   const homeIds = useMemo(() => homes.map((h) => h.id), [homes]);
@@ -53,6 +54,12 @@ function HomesPage() {
               <p className="mt-1 text-xs text-mist">Everything at a glance</p>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Link to="/admin" className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Admin panel" title="Admin panel">
+              <Shield className="size-4" />
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setShowSetup((v) => !v)}
@@ -62,6 +69,7 @@ function HomesPage() {
           >
             <Plus className="size-4" />
           </button>
+          </div>
         </header>
 
         {showSetup && (
