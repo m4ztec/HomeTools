@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAddItem, useAllItems, useHomes, useItems } from "@/hooks/useHomes";
-import { attentionScore, currency, isExpiringSoon, isLow, SELECTED_HOME_KEY } from "@/lib/inventory";
+import { attentionScore, currency, EXPIRING_DAYS, isExpiringSoon, isLow, SELECTED_HOME_KEY } from "@/lib/inventory";
 import { ItemRow } from "@/components/pantry/ItemRow";
 import { ItemEditor } from "@/components/pantry/ItemEditor";
 import { HouseholdPanel } from "@/components/pantry/HouseholdPanel";
@@ -135,7 +135,7 @@ function AppPage() {
           <>
             <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat label="Low on stock" tone="text-rose" value={String(low)} hint="items below target" />
-              <Stat label="Expiring soon" tone="text-amber" value={String(expiring)} hint="within 3 days" />
+              <Stat label="Expiring soon" tone="text-amber" value={String(expiring)} hint={`within ${EXPIRING_DAYS} days`} />
               <Stat label="Total value" tone="text-mist" value={currency.format(total)} hint={`across ${items.length} item${items.length === 1 ? "" : "s"}`} />
               <Stat label="In stock" tone="text-mint" value={String(items.length - low)} hint="at or above target" />
             </section>

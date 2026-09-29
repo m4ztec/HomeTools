@@ -5,10 +5,24 @@ export type Item = Tables<"items">;
 export type Home = Tables<"homes">;
 export type Profile = Tables<"profiles">;
 
-export const CATEGORIES = ["Dairy", "Pantry", "Produce", "Frozen", "Household", "Bathroom", "Other"] as const;
-export const UNITS = ["pcs", "kg", "g", "L", "ml", "pack"] as const;
+export type AppSettings = Tables<"app_settings">;
 
-export const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
+// App-wide settings, managed by the super-admin and applied on sign-in.
+export let CATEGORIES: string[] = ["Dairy", "Pantry", "Produce", "Frozen", "Household", "Bathroom", "Other"];
+export let UNITS: string[] = ["pcs", "kg", "g", "L", "ml", "pack"];
+export let EXPIRING_DAYS = 3;
+export let currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
+
+export function applySettings(s: Pick<AppSettings, "categories" | "units" | "currency" | "expiring_days">) {
+  CATEGORIES = s.categories;
+  UNITS = s.units;
+  EXPIRING_DAYS = s.expiring_days;
+  try {
+    currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: s.currency });
+  } catch {
+    /* keep previous formatter on invalid code */
+  }
+}
 
 export const SELECTED_HOME_KEY = "pantry:selected-home";
 
@@ -30,7 +44,7 @@ export function daysUntilExpiry(item: Item): number | null {
   return differenceInCalendarDays(parseISO(item.expires_at), new Date());
 }
 
-export function isExpiringSoon(item: Item, days = 3) {
+export function isExpiringSoon(item: Item, days = EXPIRING_DAYS) {
   const d = daysUntilExpiry(item);
   return d !== null && d <= days;
 }
@@ -49,7 +63,7 @@ export function attentionScore(item: Item) {
   const d = daysUntilExpiry(item);
   let score = 0;
   if (d !== null && d < 0) score -= 1000;
-  else if (d !== null && d <= 3) score -= 500 + (3 - d);
+  else if (d !== null && d <= EXPIRING_DAYS) score -= 500 + (EXPIRING_DAYS - d);
   if (isLow(item)) score -= 100 + (item.target_qty - item.qty);
   return score;
 }

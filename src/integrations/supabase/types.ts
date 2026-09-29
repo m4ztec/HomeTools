@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          categories: string[]
+          currency: string
+          expiring_days: number
+          id: boolean
+          signups_enabled: boolean
+          units: string[]
+          updated_at: string
+        }
+        Insert: {
+          categories?: string[]
+          currency?: string
+          expiring_days?: number
+          id?: boolean
+          signups_enabled?: boolean
+          units?: string[]
+          updated_at?: string
+        }
+        Update: {
+          categories?: string[]
+          currency?: string
+          expiring_days?: number
+          id?: boolean
+          signups_enabled?: boolean
+          units?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       home_members: {
         Row: {
           home_id: string
@@ -147,11 +177,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_list_homes: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          item_count: number
+          member_count: number
+          name: string
+          owner_name: string
+        }[]
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          home_count: number
+          id: string
+          is_admin: boolean
+          last_sign_in_at: string
+        }[]
+      }
+      claim_super_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_home_member: {
         Args: { _home_id: string; _user_id: string }
         Returns: boolean
@@ -167,7 +249,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -294,6 +376,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

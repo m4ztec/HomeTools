@@ -56,7 +56,8 @@ function AuthPage() {
         navigate({ to: "/homes", replace: true });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      toast.error(/database error saving new user|sign-ups are currently closed/i.test(msg) ? "Sign-ups are currently closed." : msg);
     } finally {
       setBusy(false);
     }
