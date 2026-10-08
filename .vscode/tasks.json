@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start local PostgreSQL",
+      "type": "process",
+      "command": "docker",
+      "args": ["compose", "up", "-d", "--wait", "db"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install frontend dependencies",
+      "type": "process",
+      "command": "npm",
+      "args": ["ci"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build API",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "backend/Pantry.Api.csproj"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Prepare API",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Start local PostgreSQL", "Build API"],
+      "problemMatcher": []
+    }
+  ]
+}
