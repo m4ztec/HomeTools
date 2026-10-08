@@ -1,17 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronsUpDown, LogOut, UserRound } from "lucide-react";
-import { ProfileDialog } from "@/features/auth/ProfileDialog";
-import { setAccessToken } from "@/shared/lib/api-client";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+import { ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { useAddItem, useAllItems, useHomes, useItems } from "@/features/pantry/hooks";
 import {
@@ -27,6 +16,7 @@ import { ItemEditor } from "@/features/pantry/components/ItemEditor";
 import { HouseholdPanel } from "@/features/pantry/components/HouseholdPanel";
 import { HomeSetup } from "@/features/pantry/components/HomeSetup";
 import { ShoppingList } from "@/features/pantry/components/ShoppingList";
+import { AppNavbar } from "@/shared/ui/AppNavbar";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({
@@ -52,13 +42,10 @@ const STORAGE_KEY = SELECTED_HOME_KEY;
 
 function AppPage() {
   const { user } = Route.useRouteContext();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { data: homes = [], isLoading } = useHomes();
   const [selected, setSelected] = useState<string | null>(() =>
     typeof window === "undefined" ? null : localStorage.getItem(STORAGE_KEY),
   );
-  const [showProfile, setShowProfile] = useState(false);
 
   const homeId = homes.some((h) => h.id === selected) ? selected : (homes[0]?.id ?? null);
   const home = homes.find((h) => h.id === homeId) ?? null;
@@ -83,38 +70,15 @@ function AppPage() {
   const expiring = items.filter((i) => isExpiringSoon(i)).length;
   const total = items.reduce((s, i) => s + Number(i.price) * i.qty, 0);
 
-  async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    setAccessToken(null);
-    navigate({ to: "/auth", replace: true });
-  }
-
   return (
     <div className="ambient min-h-screen">
       <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <Link
-              to="/homes"
-              className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow transition-colors hover:ring-1 hover:ring-glow/40"
-              aria-label="Homes overview"
-              title="Homes overview"
-            >
-              P
-            </Link>
-            <div className="min-w-0">
-              <h1 className="truncate text-xl font-semibold leading-none">
-                {home?.name ?? "Pantry"}
-              </h1>
-              <p className="mt-1 text-xs text-mist">
-                {home ? "Pantry · Household inventory" : "Household stock, kept in order"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {homes.length > 0 && (
+        <AppNavbar
+          user={user}
+          isAdmin={user.isAdmin}
+          active="pantry"
+          actions={
+            homes.length > 0 ? (
               <div className="glass relative flex items-center rounded-full">
                 <select
                   value={homeId ?? ""}
@@ -130,51 +94,9 @@ function AppPage() {
                 </select>
                 <ChevronsUpDown className="pointer-events-none absolute right-2.5 size-3.5 text-mist" />
               </div>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex size-9 items-center justify-center rounded-full glass text-mist transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  aria-label="Open account menu"
-                  title="Account"
-                >
-                  <UserRound className="size-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="glass w-52 rounded-xl border-foreground/10 p-1.5"
-              >
-                <DropdownMenuLabel className="truncate px-2 py-2 text-xs font-normal text-mist">
-                  {user.email}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-foreground/10" />
-                <DropdownMenuItem
-                  className="cursor-pointer rounded-lg py-2"
-                  onSelect={() => setShowProfile(true)}
-                >
-                  <UserRound className="size-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer rounded-lg py-2 text-rose focus:text-rose"
-                  onSelect={() => void signOut()}
-                >
-                  <LogOut className="size-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {showProfile && (
-              <ProfileDialog
-                displayName={user.displayName}
-                email={user.email ?? ""}
-                onClose={() => setShowProfile(false)}
-              />
-            )}
-          </div>
-        </header>
+            ) : null
+          }
+        />
 
         {!isLoading && homes.length === 0 && (
           <section className="mt-6">
@@ -192,6 +114,10 @@ function AppPage() {
 
         {home && (
           <>
+            <section className="mt-6">
+              <h1 className="text-xl font-semibold leading-none">{home.name}</h1>
+              <p className="mt-1 text-xs text-mist">Pantry · Household inventory</p>
+            </section>
             <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat
                 label="Low on stock"

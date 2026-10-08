@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace HomeTools.API.Services.Pantry.Data.Migrations
+namespace HomeTools.API.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

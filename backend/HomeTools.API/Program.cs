@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using HomeTools.API.Services.Authentication;
-using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Services.Irs.Services;
+using HomeTools.API.Data;
 using HomeTools.API.Services.Pantry.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,7 @@ if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32
     throw new InvalidOperationException("Jwt:Key must be configured with at least 32 bytes.");
 }
 
-builder.Services.AddDbContext<PantryDbContext>(options =>
+builder.Services.AddDbContext<HomeToolsDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services
     .AddIdentityCore<PantryUser>(options =>
@@ -32,7 +33,7 @@ builder.Services
     })
     .AddRoles<IdentityRole<Guid>>()
     .AddSignInManager()
-    .AddEntityFrameworkStores<PantryDbContext>();
+    .AddEntityFrameworkStores<HomeToolsDbContext>();
 builder.Services
     .AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -51,6 +52,7 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IrsCalculator>();
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
@@ -70,7 +72,7 @@ app.MapControllers();
 
 await using (var scope = app.Services.CreateAsyncScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<PantryDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<HomeToolsDbContext>();
     await db.Database.MigrateAsync();
 
     if (!await db.AppSettings.AnyAsync())

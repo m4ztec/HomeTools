@@ -2,14 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeTools.API.Services.Pantry.Contracts;
-using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Data;
 
 namespace HomeTools.API.Services.Pantry.Controllers;
 
 [ApiController]
 [Authorize]
 [Route("api/settings")]
-public sealed class SettingsController(PantryDbContext db) : ControllerBase
+public sealed class SettingsController(HomeToolsDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<SettingsDto>> Get() =>

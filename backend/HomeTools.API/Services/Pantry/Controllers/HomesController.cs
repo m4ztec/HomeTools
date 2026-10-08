@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeTools.API.Services.Pantry.Contracts;
-using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Data;
 using HomeTools.API.Services.Pantry.Models;
 
 namespace HomeTools.API.Services.Pantry.Controllers;
@@ -12,7 +12,7 @@ namespace HomeTools.API.Services.Pantry.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/homes")]
-public sealed class HomesController(PantryDbContext db) : ControllerBase
+public sealed class HomesController(HomeToolsDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<HomeDto>>> GetHomes()

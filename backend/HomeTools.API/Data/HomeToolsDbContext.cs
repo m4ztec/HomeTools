@@ -5,11 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using HomeTools.API.Services.Authentication;
+using HomeTools.API.Services.Irs.Models;
 using HomeTools.API.Services.Pantry.Models;
 
-namespace HomeTools.API.Services.Pantry.Data;
+namespace HomeTools.API.Data;
 
-public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
+public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> options)
     : IdentityDbContext<PantryUser, IdentityRole<Guid>, Guid>(options)
 {
     private static readonly ValueConverter<DateTimeOffset, long> DateTimeOffsetConverter = new(
@@ -27,6 +28,7 @@ public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
     public DbSet<HomeMember> HomeMembers => Set<HomeMember>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
+    public DbSet<IrsScenario> IrsScenarios => Set<IrsScenario>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -95,6 +97,15 @@ public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
             entity.Property(settings => settings.Currency).HasMaxLength(3).IsRequired();
             entity.Property(settings => settings.ExpiringDays).HasDefaultValue(3);
             entity.Property(settings => settings.SignupsEnabled).HasDefaultValue(true);
+        });
+        builder.Entity<IrsScenario>(entity =>
+        {
+            entity.ToTable("irs_scenarios");
+            entity.HasKey(scenario => scenario.Id);
+            entity.Property(scenario => scenario.Name).HasMaxLength(80).IsRequired();
+            entity.Property(scenario => scenario.InputJson).IsRequired();
+            entity.Property(scenario => scenario.ResultJson).IsRequired();
+            entity.HasIndex(scenario => new { scenario.OwnerId, scenario.UpdatedAt });
         });
     }
 }

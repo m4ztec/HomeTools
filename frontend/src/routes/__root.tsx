@@ -76,17 +76,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pantry — Household stock, kept in order" },
+      { title: "HomeTools — Practical tools for home" },
       {
         name: "description",
         content:
-          "Track what you have at home, what you want to keep stocked, and what expires soon. Share homes with your partner or family.",
+          "A self-hosted collection of household services, including Pantry and an IRS estimator.",
       },
-      { property: "og:title", content: "Pantry — Household stock, kept in order" },
+      { property: "og:title", content: "HomeTools — Practical tools for home" },
       {
         property: "og:description",
         content:
-          "Track what you have at home, what you want to keep stocked, and what expires soon.",
+          "A self-hosted collection of household services, including Pantry and an IRS estimator.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

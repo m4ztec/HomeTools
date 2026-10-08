@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeTools.API.Services.Authentication;
 using HomeTools.API.Services.Pantry.Contracts;
-using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Data;
 using HomeTools.API.Services.Pantry.Models;
 
 namespace HomeTools.API.Services.Pantry.Controllers;
@@ -13,7 +13,7 @@ namespace HomeTools.API.Services.Pantry.Controllers;
 [Authorize(Roles = "admin")]
 [Route("api/admin")]
 public sealed class AdminController(
-    PantryDbContext db,
+    HomeToolsDbContext db,
     UserManager<PantryUser> users) : ControllerBase
 {
     [HttpGet("users")]

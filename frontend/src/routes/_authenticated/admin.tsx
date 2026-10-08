@@ -1,10 +1,11 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Shield, Trash2, X } from "lucide-react";
+import { Shield, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { pantryApi } from "@/features/pantry/api";
 import { applySettings, type AppSettings } from "@/features/pantry/model";
+import { AppNavbar } from "@/shared/ui/AppNavbar";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: ({ context }) => {
@@ -30,24 +31,18 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminPage() {
+  const { user } = Route.useRouteContext();
+
   return (
     <div className="ambient min-h-screen">
       <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex items-center gap-3">
-          <Link
-            to="/homes"
-            className="glass grid size-10 place-items-center rounded-xl text-mist hover:text-foreground"
-            aria-label="Back to homes"
-          >
-            <ArrowLeft className="size-4" />
-          </Link>
-          <div>
-            <h1 className="flex items-center gap-2 text-xl font-semibold leading-none">
-              <Shield className="size-5 text-glow" /> Admin panel
-            </h1>
-            <p className="mt-1 text-xs text-mist">App-wide configuration</p>
-          </div>
-        </header>
+        <AppNavbar user={user} isAdmin={user.isAdmin} active="admin" />
+        <section className="mt-6">
+          <h1 className="flex items-center gap-2 text-xl font-semibold leading-none">
+            <Shield className="size-5 text-glow" /> Admin panel
+          </h1>
+          <p className="mt-1 text-xs text-mist">App-wide configuration</p>
+        </section>
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           <SettingsPanel />
           <div className="space-y-4">

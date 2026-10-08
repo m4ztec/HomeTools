@@ -1,6 +1,6 @@
-# Pantry
+# HomeTools
 
-Pantry is a household inventory app with a React/TanStack frontend and an ASP.NET Core API using Entity Framework Core, Identity, and SQLite.
+HomeTools is a collection of household services with a React/TanStack frontend and an ASP.NET Core API using Entity Framework Core, Identity, and SQLite. It currently includes Pantry inventory and a Portuguese IRS estimator.
 
 ## Self-host with Docker
 
@@ -34,6 +34,8 @@ Docker Compose builds and runs the frontend and API together in one image and co
 4. Open `http://localhost:8080` (or the port configured by `APP_PORT` in `.env`).
 
 The API applies database migrations and seeds its initial settings and roles when it starts. The first account registered becomes the administrator. The API listens only inside the container; the frontend forwards `/api/` requests to it.
+
+The authenticated **IRS simulator** provides planning estimates for 2026 income in mainland Portugal, Madeira, and the Azores. Users can save and update their own scenarios. Its feature scope was informed by [simulador-irs](https://github.com/m4ztec/simulador-irs). Results are estimates for educational planning only, not official tax advice.
 
 To stop the app while retaining its database, run `docker compose down`. The named volume `pantry-data` survives container rebuilds and restarts. To permanently delete the database as well, run `docker compose down --volumes`. Back up the `pantry-data` Docker volume regularly. For an internet-facing deployment, put the app behind a TLS-terminating reverse proxy and use a strong, private `JWT_KEY`.
 
@@ -78,8 +80,11 @@ From the `frontend/` folder, you can run `npm install` then `npm run dev` and `n
 - `frontend/public/` — static files served as-is
 - `frontend/` — frontend package manifest, Vite, TypeScript, lint, and Docker configuration
 - `backend/HomeTools.API/` — ASP.NET API host and its service modules
+- `backend/HomeTools.API/Data/` — shared SQLite/EF Core context and schema migrations
 - `backend/HomeTools.API/Services/Authentication/` — identity, profile, and token functionality
-- `backend/HomeTools.API/Services/Pantry/` — pantry endpoints, contracts, persistence, and migrations
+- `backend/HomeTools.API/Services/Pantry/` — pantry endpoints, contracts, and domain models
+- `backend/HomeTools.API/Services/Irs/` — IRS estimate calculations and user-owned saved scenarios
+- `frontend/src/features/irs/` — IRS simulator API client and interface
 - `deploy/` — container process entrypoint
 
 ## Useful commands

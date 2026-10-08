@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeTools.API.Services.Authentication.Contracts;
-using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Data;
 using HomeTools.API.Services.Authentication;
 
 namespace HomeTools.API.Services.Authentication.Controllers;
@@ -12,7 +12,7 @@ namespace HomeTools.API.Services.Authentication.Controllers;
 [ApiController]
 [Route("api/auth")]
 public sealed class AuthController(
-    PantryDbContext db,
+    HomeToolsDbContext db,
     UserManager<PantryUser> users,
     SignInManager<PantryUser> signInManager,
     TokenService tokens) : ControllerBase
