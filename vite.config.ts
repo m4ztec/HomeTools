@@ -7,4 +7,9 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [tanstackStart(), viteReact(), tailwindcss(), nitro({ preset: "node-server" })],
   resolve: { tsconfigPaths: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    watch: { ignored: ["**/backend/**"] },
+  },
 });

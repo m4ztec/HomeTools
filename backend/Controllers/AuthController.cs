@@ -29,7 +29,6 @@ public sealed class AuthController(
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync();
-        await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock(724113)");
         var settings = await db.AppSettings.SingleAsync();
         if (!settings.SignupsEnabled)
         {

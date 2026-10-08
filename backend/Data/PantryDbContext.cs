@@ -1,6 +1,9 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pantry.Api.Models;
 
 namespace Pantry.Api.Data;
@@ -8,6 +11,17 @@ namespace Pantry.Api.Data;
 public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
     : IdentityDbContext<PantryUser, IdentityRole<Guid>, Guid>(options)
 {
+    private static readonly ValueConverter<DateTimeOffset, long> DateTimeOffsetConverter = new(
+        value => value.UtcDateTime.Ticks,
+        value => new DateTimeOffset(value, TimeSpan.Zero));
+    private static readonly ValueConverter<string[], string> StringArrayConverter = new(
+        value => JsonSerializer.Serialize(value, (JsonSerializerOptions?)null),
+        value => JsonSerializer.Deserialize<string[]>(value, (JsonSerializerOptions?)null) ?? Array.Empty<string>());
+    private static readonly ValueComparer<string[]> StringArrayComparer = new(
+        (left, right) => left!.SequenceEqual(right!),
+        value => value!.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+        value => value!.ToArray());
+
     public DbSet<Home> Homes => Set<Home>();
     public DbSet<HomeMember> HomeMembers => Set<HomeMember>();
     public DbSet<Item> Items => Set<Item>();
@@ -17,22 +31,30 @@ public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
     {
         base.OnModelCreating(builder);
 
+        foreach (var property in builder.Model.GetEntityTypes().SelectMany(entity => entity.GetProperties()))
+        {
+            var propertyType = Nullable.GetUnderlyingType(property.ClrType) ?? property.ClrType;
+            if (propertyType == typeof(DateTimeOffset))
+            {
+                property.SetValueConverter(DateTimeOffsetConverter);
+            }
+        }
+
         builder.Entity<PantryUser>(entity =>
         {
-            entity.ToTable("users", "identity");
+            entity.ToTable("users");
             entity.Property(user => user.DisplayName).HasMaxLength(60).IsRequired();
-            entity.Property(user => user.CreatedAt).HasDefaultValueSql("now()");
         });
-        builder.Entity<IdentityRole<Guid>>().ToTable("roles", "identity");
-        builder.Entity<IdentityUserRole<Guid>>().ToTable("user_roles", "identity");
-        builder.Entity<IdentityUserClaim<Guid>>().ToTable("user_claims", "identity");
-        builder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins", "identity");
-        builder.Entity<IdentityRoleClaim<Guid>>().ToTable("role_claims", "identity");
-        builder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens", "identity");
+        builder.Entity<IdentityRole<Guid>>().ToTable("roles");
+        builder.Entity<IdentityUserRole<Guid>>().ToTable("user_roles");
+        builder.Entity<IdentityUserClaim<Guid>>().ToTable("user_claims");
+        builder.Entity<IdentityUserLogin<Guid>>().ToTable("user_logins");
+        builder.Entity<IdentityRoleClaim<Guid>>().ToTable("role_claims");
+        builder.Entity<IdentityUserToken<Guid>>().ToTable("user_tokens");
 
         builder.Entity<Home>(entity =>
         {
-            entity.ToTable("homes", "pantry");
+            entity.ToTable("homes");
             entity.HasKey(home => home.Id);
             entity.Property(home => home.Name).HasMaxLength(120).IsRequired();
             entity.Property(home => home.InviteCode).HasMaxLength(8).IsRequired();
@@ -42,14 +64,14 @@ public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
         });
         builder.Entity<HomeMember>(entity =>
         {
-            entity.ToTable("home_members", "pantry");
+            entity.ToTable("home_members");
             entity.HasKey(member => new { member.HomeId, member.UserId });
             entity.Property(member => member.Role).HasMaxLength(16).IsRequired();
             entity.HasOne(member => member.User).WithMany().HasForeignKey(member => member.UserId).OnDelete(DeleteBehavior.Cascade);
         });
         builder.Entity<Item>(entity =>
         {
-            entity.ToTable("items", "pantry");
+            entity.ToTable("items");
             entity.HasKey(item => item.Id);
             entity.Property(item => item.Name).HasMaxLength(120).IsRequired();
             entity.Property(item => item.Category).HasMaxLength(60).IsRequired();
@@ -61,10 +83,14 @@ public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
         });
         builder.Entity<AppSettings>(entity =>
         {
-            entity.ToTable("app_settings", "pantry");
+            entity.ToTable("app_settings");
             entity.HasKey(settings => settings.Id);
-            entity.Property(settings => settings.Categories).HasColumnType("text[]");
-            entity.Property(settings => settings.Units).HasColumnType("text[]");
+            entity.Property(settings => settings.Categories)
+                .HasConversion(StringArrayConverter)
+                .Metadata.SetValueComparer(StringArrayComparer);
+            entity.Property(settings => settings.Units)
+                .HasConversion(StringArrayConverter)
+                .Metadata.SetValueComparer(StringArrayComparer);
             entity.Property(settings => settings.Currency).HasMaxLength(3).IsRequired();
             entity.Property(settings => settings.ExpiringDays).HasDefaultValue(3);
             entity.Property(settings => settings.SignupsEnabled).HasDefaultValue(true);

@@ -8,8 +8,10 @@ using Pantry.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var dataDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+Directory.CreateDirectory(dataDirectory);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required.");
+    ?? $"Data Source={Path.Combine(dataDirectory, "pantry.db")}";
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32)
 {
@@ -17,7 +19,7 @@ if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32
 }
 
 builder.Services.AddDbContext<PantryDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseSqlite(connectionString));
 builder.Services
     .AddIdentityCore<PantryUser>(options =>
     {

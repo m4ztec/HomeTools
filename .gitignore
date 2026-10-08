@@ -11,6 +11,9 @@ node_modules
 backend/bin/
 backend/obj/
 backend/.vs/
+backend/App_Data/
+*.db-shm
+*.db-wal
 dist
 dist-ssr
 .output
