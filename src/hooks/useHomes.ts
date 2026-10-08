@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { pantryApi, type Member } from "@/lib/api";
-import type { Home, Item } from "@/lib/inventory";
+import { pantryApi } from "@/lib/api";
+import type { Item } from "@/lib/inventory";
 
 export function useHomes() {
   return useQuery({

@@ -40,6 +40,8 @@ Pantry is a shared household inventory app. The frontend is React/TanStack Start
 
 EF Core applies database migrations at API startup and seeds default settings and the built-in roles. The first account registered is made the administrator; subsequent accounts receive the regular user role. Account registration and sign-in use ASP.NET Core Identity, with 12-hour bearer tokens.
 
+For a production frontend build, run `npm run build` and start the generated Node server with `npm start`. The API is deployed separately.
+
 ## Data migration
 
 The API is configured for a **fresh PostgreSQL database** and creates its own `identity` and `pantry` schemas. Existing Supabase users and inventory are not imported. Supabase password credentials are not transferable to ASP.NET Core Identity, so users must register new accounts. Export any data that should be retained before switching over.

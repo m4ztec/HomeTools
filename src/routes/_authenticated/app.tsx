@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronsUpDown, LogOut, UserRound } from "lucide-react";
 import { ProfileDialog } from "@/components/pantry/ProfileDialog";
-import { Button } from "@/components/ui/button";
 import { setAccessToken } from "@/lib/api";
 import {
   DropdownMenu,
@@ -134,15 +133,14 @@ function AppPage() {
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="glass rounded-full text-mist hover:text-foreground"
+                <button
+                  type="button"
+                  className="inline-flex size-9 items-center justify-center rounded-full glass text-mist transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label="Open account menu"
                   title="Account"
                 >
                   <UserRound className="size-4" />
-                </Button>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
