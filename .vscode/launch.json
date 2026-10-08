@@ -26,7 +26,11 @@
       "type": "node-terminal",
       "request": "launch",
       "preLaunchTask": "Install frontend dependencies",
-      "command": "npm run dev"
+      "command": "npm run dev",
+      "serverReadyAction": {
+        "action": "openIntegratedBrowser",
+        "pattern": "Local:\\s+(https?://\\S+)"
+      }
     }
   ]
 }

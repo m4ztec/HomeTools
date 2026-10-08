@@ -14,8 +14,9 @@ Pantry is a household inventory app with a React/TanStack frontend and an ASP.NE
 
 1. Open the repository folder in VS Code.
 2. Open **Run and Debug** (`Ctrl+Shift+D`), select **Run Pantry (full stack)**, and press **F5**.
-3. VS Code builds and launches the API, installs frontend dependencies, and starts the frontend.
-4. Open [http://localhost:5173](http://localhost:5173).
+3. VS Code builds and launches the API, installs frontend dependencies, and starts the frontend in the integrated browser.
+
+The frontend opens automatically in VS Code's Integrated Browser when the dev server is ready. This uses VS Code's `openIntegratedBrowser` server-ready action and requires a VS Code version that supports the Integrated Browser.
 
 The API listens at `http://localhost:5050`. It creates `backend/App_Data/pantry.db`, applies EF Core migrations, and seeds default settings and roles on first run. The first account registered becomes the administrator.
 
