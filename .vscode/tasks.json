@@ -15,7 +15,7 @@
       "label": "Build API",
       "type": "process",
       "command": "dotnet",
-      "args": ["build", "backend/Pantry.Api.csproj"],
+      "args": ["build", "backend/HomeTools.API/HomeTools.API.csproj"],
       "options": {
         "cwd": "${workspaceFolder}"
       },

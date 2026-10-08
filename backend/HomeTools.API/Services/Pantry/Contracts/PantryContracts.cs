@@ -1,14 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Pantry.Api.Models;
+using HomeTools.API.Services.Pantry.Models;
 
-namespace Pantry.Api.Contracts;
+namespace HomeTools.API.Services.Pantry.Contracts;
 
-public sealed record RegisterRequest(string Email, string Password, string DisplayName);
-public sealed record LoginRequest(string Email, string Password);
-public sealed record AuthUserDto(Guid Id, string Email, string DisplayName, bool IsAdmin);
-public sealed record AuthResponse(string AccessToken, AuthUserDto User);
-public sealed record UpdateProfileRequest(string DisplayName, string? CurrentPassword, string? NewPassword);
 public sealed record CreateHomeRequest(string Name);
 public sealed record JoinHomeRequest(string Code);
 public sealed record HomeDto(

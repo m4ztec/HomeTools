@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Pantry.Api.Contracts;
-using Pantry.Api.Data;
-using Pantry.Api.Models;
-using Pantry.Api.Services;
+using HomeTools.API.Services.Authentication.Contracts;
+using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Services.Authentication;
 
-namespace Pantry.Api.Controllers;
+namespace HomeTools.API.Services.Authentication.Controllers;
 
 [ApiController]
 [Route("api/auth")]

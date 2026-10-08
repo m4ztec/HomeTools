@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Pantry.Api.Contracts;
-using Pantry.Api.Data;
+using HomeTools.API.Services.Pantry.Contracts;
+using HomeTools.API.Services.Pantry.Data;
 
-namespace Pantry.Api.Controllers;
+namespace HomeTools.API.Services.Pantry.Controllers;
 
 [ApiController]
 [Authorize]

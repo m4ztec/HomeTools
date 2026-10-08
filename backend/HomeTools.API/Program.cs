@@ -2,9 +2,9 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Pantry.Api.Data;
-using Pantry.Api.Models;
-using Pantry.Api.Services;
+using HomeTools.API.Services.Authentication;
+using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Services.Pantry.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +40,7 @@ builder.Services
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "Pantry.Api",
+            ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "HomeTools.API",
             ValidateAudience = true,
             ValidAudience = builder.Configuration["Jwt:Audience"] ?? "Pantry.Web",
             ValidateIssuerSigningKey = true,

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Pantry.Api.Data;
+namespace HomeTools.API.Services.Pantry.Data;
 
 public sealed class PantryDbContextFactory : IDesignTimeDbContextFactory<PantryDbContext>
 {

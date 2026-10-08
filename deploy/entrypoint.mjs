@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 
 const processes = [
-  ["API", "dotnet", ["Pantry.Api.dll"]],
+  ["API", "dotnet", ["HomeTools.API.dll"]],
   ["frontend", "node", [".output/server/index.mjs"]],
 ].map(([name, command, args]) => {
   const child = spawn(command, args, { stdio: "inherit" });

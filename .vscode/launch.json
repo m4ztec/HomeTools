@@ -3,18 +3,18 @@
   "compounds": [
     {
       "name": "Run Pantry (full stack)",
-      "configurations": ["Pantry API", "Pantry frontend"],
+      "configurations": ["HomeTools API", "Pantry frontend"],
       "stopAll": true
     }
   ],
   "configurations": [
     {
-      "name": "Pantry API",
+      "name": "HomeTools API",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "Build API",
-      "program": "${workspaceFolder}/backend/bin/Debug/net10.0/Pantry.Api.dll",
-      "cwd": "${workspaceFolder}/backend",
+      "program": "${workspaceFolder}/backend/HomeTools.API/bin/Debug/net10.0/HomeTools.API.dll",
+      "cwd": "${workspaceFolder}/backend/HomeTools.API",
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "http://localhost:5050",

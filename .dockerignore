@@ -7,9 +7,9 @@
 .nitro
 dist
 node_modules
-backend/bin
-backend/obj
-backend/App_Data
+backend/**/bin
+backend/**/obj
+backend/**/App_Data
 *.db
 *.db-shm
 *.db-wal

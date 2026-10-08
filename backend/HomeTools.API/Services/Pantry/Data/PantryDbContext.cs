@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Pantry.Api.Models;
+using HomeTools.API.Services.Authentication;
+using HomeTools.API.Services.Pantry.Models;
 
-namespace Pantry.Api.Data;
+namespace HomeTools.API.Services.Pantry.Data;
 
 public sealed class PantryDbContext(DbContextOptions<PantryDbContext> options)
     : IdentityDbContext<PantryUser, IdentityRole<Guid>, Guid>(options)

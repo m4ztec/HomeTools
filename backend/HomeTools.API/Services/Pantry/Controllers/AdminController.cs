@@ -2,11 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Pantry.Api.Contracts;
-using Pantry.Api.Data;
-using Pantry.Api.Models;
+using HomeTools.API.Services.Authentication;
+using HomeTools.API.Services.Pantry.Contracts;
+using HomeTools.API.Services.Pantry.Data;
+using HomeTools.API.Services.Pantry.Models;
 
-namespace Pantry.Api.Controllers;
+namespace HomeTools.API.Services.Pantry.Controllers;
 
 [ApiController]
 [Authorize(Roles = "admin")]

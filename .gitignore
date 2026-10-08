@@ -8,10 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-backend/bin/
-backend/obj/
-backend/.vs/
-backend/App_Data/
+backend/**/bin/
+backend/**/obj/
+backend/**/.vs/
+backend/**/App_Data/
 *.db-shm
 *.db-wal
 dist
@@ -24,7 +24,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
-data/
+/data/
 
 # Wrangler / Cloudflare
 .wrangler/

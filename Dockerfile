@@ -12,11 +12,11 @@ RUN npm run build
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /src
 
-COPY backend/Pantry.Api.csproj backend/
-RUN dotnet restore backend/Pantry.Api.csproj
+COPY backend/HomeTools.API/HomeTools.API.csproj backend/HomeTools.API/
+RUN dotnet restore backend/HomeTools.API/HomeTools.API.csproj
 
 COPY backend/ backend/
-RUN dotnet publish backend/Pantry.Api.csproj --configuration Release --output /app/publish --no-restore
+RUN dotnet publish backend/HomeTools.API/HomeTools.API.csproj --configuration Release --output /app/publish --no-restore
 
 FROM node:22-bookworm-slim AS node-runtime
 

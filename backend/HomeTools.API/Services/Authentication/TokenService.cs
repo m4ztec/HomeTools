@@ -3,15 +3,14 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Pantry.Api.Models;
 
-namespace Pantry.Api.Services;
+namespace HomeTools.API.Services.Authentication;
 
 public sealed class TokenService(IConfiguration configuration, UserManager<PantryUser> userManager)
 {
     public async Task<string> CreateAsync(PantryUser user)
     {
-        var issuer = configuration["Jwt:Issuer"] ?? "Pantry.Api";
+        var issuer = configuration["Jwt:Issuer"] ?? "HomeTools.API";
         var audience = configuration["Jwt:Audience"] ?? "Pantry.Web";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         var claims = new List<Claim>

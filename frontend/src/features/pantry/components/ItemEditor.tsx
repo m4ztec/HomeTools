@@ -60,7 +60,11 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
           <label className="text-xs text-mist">Price (€)</label>
           <input
             className="field mt-1"
+            type="number"
             inputMode="decimal"
+            min="0"
+            max="99999999.99"
+            step="0.01"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="0.00"
@@ -96,7 +100,11 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
           <label className="text-xs text-mist">Have ({unit})</label>
           <input
             className="field mt-1"
+            type="number"
             inputMode="decimal"
+            min="0"
+            max="99999999.99"
+            step="0.01"
             value={qty}
             onChange={(e) => setQty(e.target.value)}
             placeholder="0.7"
@@ -106,7 +114,11 @@ export function ItemEditor({ initial, submitLabel, busy, onSubmit, extra }: Prop
           <label className="text-xs text-mist">Want to keep ({unit})</label>
           <input
             className="field mt-1"
+            type="number"
             inputMode="decimal"
+            min="0"
+            max="99999999.99"
+            step="0.01"
             value={target}
             onChange={(e) => setTarget(e.target.value)}
             placeholder="1"

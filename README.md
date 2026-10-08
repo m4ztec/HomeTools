@@ -53,13 +53,13 @@ To stop the app while retaining its database, run `docker compose down`. The nam
 
 The frontend opens automatically in VS Code's Integrated Browser when the dev server is ready. This uses VS Code's `openIntegratedBrowser` server-ready action and requires a VS Code version that supports the Integrated Browser.
 
-The API listens at `http://localhost:5050`. It creates `backend/App_Data/pantry.db`, applies EF Core migrations, and seeds default settings and roles on first run. The first account registered becomes the administrator.
+The API listens at `http://localhost:5050`. It creates `backend/HomeTools.API/App_Data/pantry.db`, applies EF Core migrations, and seeds default settings and roles on first run. The first account registered becomes the administrator.
 
-The JWT signing key in `.vscode/launch.json` is for local development only. Do not reuse it outside local development. Back up `backend/App_Data/pantry.db` to preserve local data.
+The JWT signing key in `.vscode/launch.json` is for local development only. Do not reuse it outside local development. Back up `backend/HomeTools.API/App_Data/pantry.db` to preserve local data.
 
 The SQLite database is created fresh; existing PostgreSQL data is not migrated.
 
-To stop the app, stop the compound debug session in VS Code. The SQLite database remains in `backend/App_Data/`.
+To stop the app, stop the compound debug session in VS Code. The SQLite database remains in `backend/HomeTools.API/App_Data/`.
 
 ### Run pieces independently
 
@@ -77,8 +77,10 @@ From the `frontend/` folder, you can run `npm install` then `npm run dev` and `n
 - `frontend/src/shared/` — shared API client, utilities, and UI
 - `frontend/public/` — static files served as-is
 - `frontend/` — frontend package manifest, Vite, TypeScript, lint, and Docker configuration
-- `backend/` — ASP.NET API, EF Core models, migrations, and the local SQLite database
-- `deploy/` — reverse-proxy configuration used by Docker Compose
+- `backend/HomeTools.API/` — ASP.NET API host and its service modules
+- `backend/HomeTools.API/Services/Authentication/` — identity, profile, and token functionality
+- `backend/HomeTools.API/Services/Pantry/` — pantry endpoints, contracts, persistence, and migrations
+- `deploy/` — container process entrypoint
 
 ## Useful commands
 

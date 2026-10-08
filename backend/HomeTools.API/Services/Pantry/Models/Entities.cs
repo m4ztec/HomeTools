@@ -1,12 +1,6 @@
-using Microsoft.AspNetCore.Identity;
+using HomeTools.API.Services.Authentication;
 
-namespace Pantry.Api.Models;
-
-public sealed class PantryUser : IdentityUser<Guid>
-{
-    public string DisplayName { get; set; } = "";
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-}
+namespace HomeTools.API.Services.Pantry.Models;
 
 public sealed class Home
 {
