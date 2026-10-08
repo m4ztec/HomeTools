@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { pantryApi } from "@/lib/api";
-import type { Item } from "@/lib/inventory";
+import { pantryApi } from "./api";
+import type { Item, ItemInput } from "./model";
 
 export function useHomes() {
   return useQuery({
@@ -66,16 +66,6 @@ export function useLeaveHome() {
     onError: (error) => toast.error(error.message),
   });
 }
-
-export type ItemInput = {
-  name: string;
-  category: string;
-  price: number;
-  unit: string;
-  qty: number;
-  target_qty: number;
-  expires_at: string | null;
-};
 
 export function useAddItem(homeId: string | null) {
   const invalidate = useInvalidate();

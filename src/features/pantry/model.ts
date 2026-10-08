@@ -32,7 +32,17 @@ export type AppSettings = {
   updated_at: string;
 };
 
-// App-wide settings, managed by the super-admin and applied on sign-in.
+export type ItemInput = {
+  name: string;
+  category: string;
+  price: number;
+  unit: string;
+  qty: number;
+  target_qty: number;
+  expires_at: string | null;
+};
+
+// Pantry settings applied to the current user's inventory view.
 export let CATEGORIES: string[] = [
   "Dairy",
   "Pantry",

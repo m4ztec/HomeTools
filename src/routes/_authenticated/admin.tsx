@@ -3,8 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Shield, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-import { pantryApi } from "@/lib/api";
-import { applySettings, type AppSettings } from "@/lib/inventory";
+import { pantryApi } from "@/features/pantry/api";
+import { applySettings, type AppSettings } from "@/features/pantry/model";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: ({ context }) => {

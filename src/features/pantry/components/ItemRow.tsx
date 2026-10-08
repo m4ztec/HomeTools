@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { currency, daysUntilExpiry, expiryLabel, formatQty, isLow, qtyStep, type Item } from "@/lib/inventory";
-import { useDeleteItem, useUpdateItem } from "@/hooks/useHomes";
+import {
+  currency,
+  daysUntilExpiry,
+  expiryLabel,
+  formatQty,
+  isLow,
+  qtyStep,
+  type Item,
+} from "../model";
+import { useDeleteItem, useUpdateItem } from "../hooks";
 import { ItemEditor } from "./ItemEditor";
 
 export function ItemRow({ item }: { item: Item }) {
@@ -15,16 +23,27 @@ export function ItemRow({ item }: { item: Item }) {
   const low = isLow(item);
   const step = qtyStep(item.unit);
 
-  const setQty = (q: number) => update.mutate({ id: item.id, qty: Math.max(0, Number(q.toFixed(2))) });
+  const setQty = (q: number) =>
+    update.mutate({ id: item.id, qty: Math.max(0, Number(q.toFixed(2))) });
 
   return (
     <div className="py-3">
       <div className="flex items-center gap-3">
-        <button type="button" onClick={() => setEditing((v) => !v)} className="min-w-0 flex-1 text-left">
+        <button
+          type="button"
+          onClick={() => setEditing((v) => !v)}
+          className="min-w-0 flex-1 text-left"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-medium">{item.name}</p>
-            {expiry && days !== null && days <= 7 && <span className={`pill ${expiryTone}`}>{expiry}</span>}
-            {low ? <span className="pill bg-rose/15 text-rose">Low</span> : <span className="pill bg-mint/15 text-mint">OK</span>}
+            {expiry && days !== null && days <= 7 && (
+              <span className={`pill ${expiryTone}`}>{expiry}</span>
+            )}
+            {low ? (
+              <span className="pill bg-rose/15 text-rose">Low</span>
+            ) : (
+              <span className="pill bg-mint/15 text-mint">OK</span>
+            )}
           </div>
           <p className="mt-0.5 text-xs text-mist">
             {item.category} · {currency.format(Number(item.price))} / {item.unit}
@@ -32,11 +51,34 @@ export function ItemRow({ item }: { item: Item }) {
           </p>
         </button>
         <div className="flex shrink-0 items-center gap-1">
-          <button type="button" className="qty-btn" aria-label={`Decrease ${item.name}`} onClick={() => setQty(item.qty - step)} disabled={item.qty === 0}>−</button>
-          <span className="min-w-10 text-center text-sm font-medium">{formatQty(item.qty)}<span className="text-xs text-mist"> {item.unit}</span></span>
-          <button type="button" className="qty-btn" aria-label={`Increase ${item.name}`} onClick={() => setQty(item.qty + step)}>+</button>
+          <button
+            type="button"
+            className="qty-btn"
+            aria-label={`Decrease ${item.name}`}
+            onClick={() => setQty(item.qty - step)}
+            disabled={item.qty === 0}
+          >
+            −
+          </button>
+          <span className="min-w-10 text-center text-sm font-medium">
+            {formatQty(item.qty)}
+            <span className="text-xs text-mist"> {item.unit}</span>
+          </span>
+          <button
+            type="button"
+            className="qty-btn"
+            aria-label={`Increase ${item.name}`}
+            onClick={() => setQty(item.qty + step)}
+          >
+            +
+          </button>
           <span className="mx-1 text-xs text-mist">/</span>
-          <span className="min-w-8 text-center text-sm font-medium text-mist" title="Target quantity">{formatQty(item.target_qty)}</span>
+          <span
+            className="min-w-8 text-center text-sm font-medium text-mist"
+            title="Target quantity"
+          >
+            {formatQty(item.target_qty)}
+          </span>
           <button
             type="button"
             className="qty-btn ml-2"
@@ -55,13 +97,23 @@ export function ItemRow({ item }: { item: Item }) {
             submitLabel="Save changes"
             busy={update.isPending}
             onSubmit={(values) => {
-              update.mutate({ id: item.id, ...values }, { onSuccess: () => { setEditing(false); toast.success("Saved"); } });
+              update.mutate(
+                { id: item.id, ...values },
+                {
+                  onSuccess: () => {
+                    setEditing(false);
+                    toast.success("Saved");
+                  },
+                },
+              );
             }}
             extra={
               <button
                 type="button"
                 className="btn-ghost flex items-center gap-2 text-rose hover:text-rose"
-                onClick={() => remove.mutate(item.id, { onSuccess: () => toast.success(`Removed ${item.name}`) })}
+                onClick={() =>
+                  remove.mutate(item.id, { onSuccess: () => toast.success(`Removed ${item.name}`) })
+                }
               >
                 <Trash2 className="size-4" /> Remove
               </button>

@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { useSession } from "@/hooks/useSession";
-import { authApi, setAccessToken } from "@/lib/api";
+import { useSession } from "@/features/auth/useSession";
+import { authApi } from "@/features/auth/api";
+import { setAccessToken } from "@/shared/lib/api-client";
 
 type Search = { mode?: "signin" | "signup" };
 

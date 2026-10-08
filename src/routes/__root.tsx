@@ -11,8 +11,8 @@ import { useEffect, type ReactNode } from "react";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { onAuthChanged } from "@/lib/api";
-import { Toaster } from "@/components/ui/sonner";
+import { onAuthChanged } from "@/shared/lib/api-client";
+import { Toaster } from "@/shared/ui/Toaster";
 
 function NotFoundComponent() {
   return (

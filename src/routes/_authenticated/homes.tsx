@@ -1,18 +1,30 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Home as HomeIcon, Plus, Shield } from "lucide-react";
-import { useAllItems, useHomes } from "@/hooks/useHomes";
-import { currency, isExpiringSoon, isLow, SELECTED_HOME_KEY, type Item } from "@/lib/inventory";
-import { ShoppingList } from "@/components/pantry/ShoppingList";
-import { HomeSetup } from "@/components/pantry/HomeSetup";
+import { useAllItems, useHomes } from "@/features/pantry/hooks";
+import {
+  currency,
+  isExpiringSoon,
+  isLow,
+  SELECTED_HOME_KEY,
+  type Item,
+} from "@/features/pantry/model";
+import { ShoppingList } from "@/features/pantry/components/ShoppingList";
+import { HomeSetup } from "@/features/pantry/components/HomeSetup";
 
 export const Route = createFileRoute("/_authenticated/homes")({
   head: () => ({
     meta: [
       { title: "Homes overview — Pantry" },
-      { name: "description", content: "Every home you belong to at a glance, plus a combined shopping list." },
+      {
+        name: "description",
+        content: "Every home you belong to at a glance, plus a combined shopping list.",
+      },
       { property: "og:title", content: "Homes overview — Pantry" },
-      { property: "og:description", content: "Every home you belong to at a glance, plus a combined shopping list." },
+      {
+        property: "og:description",
+        content: "Every home you belong to at a glance, plus a combined shopping list.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -48,27 +60,34 @@ function HomesPage() {
       <div className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow">P</div>
+            <div className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow">
+              P
+            </div>
             <div>
               <h1 className="text-xl font-semibold leading-none">My homes</h1>
               <p className="mt-1 text-xs text-mist">Everything at a glance</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-          {isAdmin && (
-            <Link to="/admin" className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground" aria-label="Admin panel" title="Admin panel">
-              <Shield className="size-4" />
-            </Link>
-          )}
-          <button
-            type="button"
-            onClick={() => setShowSetup((v) => !v)}
-            className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground"
-            aria-label="Add or join a home"
-            title="Add or join a home"
-          >
-            <Plus className="size-4" />
-          </button>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground"
+                aria-label="Admin panel"
+                title="Admin panel"
+              >
+                <Shield className="size-4" />
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowSetup((v) => !v)}
+              className="glass grid size-9 place-items-center rounded-full text-mist transition-colors hover:text-foreground"
+              aria-label="Add or join a home"
+              title="Add or join a home"
+            >
+              <Plus className="size-4" />
+            </button>
           </div>
         </header>
 
@@ -80,7 +99,9 @@ function HomesPage() {
 
         {homes.length === 0 ? (
           <section className="glass mt-6 rounded-3xl p-8 text-center">
-            <p className="text-sm text-mist">You're not in any home yet — create or join one above.</p>
+            <p className="text-sm text-mist">
+              You're not in any home yet — create or join one above.
+            </p>
           </section>
         ) : (
           <>
@@ -107,11 +128,19 @@ function HomesPage() {
                         <p className="text-xs text-mist">items</p>
                       </div>
                       <div>
-                        <p className={`font-display text-2xl font-semibold ${low > 0 ? "text-rose" : "text-mint"}`}>{low}</p>
+                        <p
+                          className={`font-display text-2xl font-semibold ${low > 0 ? "text-rose" : "text-mint"}`}
+                        >
+                          {low}
+                        </p>
                         <p className="text-xs text-mist">low</p>
                       </div>
                       <div>
-                        <p className={`font-display text-2xl font-semibold ${expiring > 0 ? "text-amber" : ""}`}>{expiring}</p>
+                        <p
+                          className={`font-display text-2xl font-semibold ${expiring > 0 ? "text-amber" : ""}`}
+                        >
+                          {expiring}
+                        </p>
                         <p className="text-xs text-mist">expiring</p>
                       </div>
                     </div>

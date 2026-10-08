@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { ShoppingCart } from "lucide-react";
-import { currency, formatQty, isLow, type Home, type Item } from "@/lib/inventory";
+import { currency, formatQty, isLow, type Home, type Item } from "../model";
 
 type Props = {
   items: Item[];
@@ -21,9 +21,13 @@ export function ShoppingList({ items, homes }: Props) {
     }
     // Largest shortfall first within each home
     for (const list of byHome.values()) {
-      list.sort((a, b) => b.target_qty - b.qty - (a.target_qty - a.qty) || a.name.localeCompare(b.name));
+      list.sort(
+        (a, b) => b.target_qty - b.qty - (a.target_qty - a.qty) || a.name.localeCompare(b.name),
+      );
     }
-    return [...byHome.entries()].sort(([a], [b]) => (homeNames.get(a) ?? "").localeCompare(homeNames.get(b) ?? ""));
+    return [...byHome.entries()].sort(([a], [b]) =>
+      (homeNames.get(a) ?? "").localeCompare(homeNames.get(b) ?? ""),
+    );
   }, [items, homeNames]);
 
   const totalCost = useMemo(
@@ -43,12 +47,16 @@ export function ShoppingList({ items, homes }: Props) {
         </span>
       </div>
       {count === 0 ? (
-        <p className="py-8 text-center text-sm text-mist">Nothing missing — every home is at or above target.</p>
+        <p className="py-8 text-center text-sm text-mist">
+          Nothing missing — every home is at or above target.
+        </p>
       ) : (
         <div className="mt-4 space-y-5">
           {groups.map(([homeId, list]) => (
             <div key={homeId}>
-              <p className="text-xs uppercase tracking-[0.12em] text-mist">{homeNames.get(homeId) ?? "Home"}</p>
+              <p className="text-xs uppercase tracking-[0.12em] text-mist">
+                {homeNames.get(homeId) ?? "Home"}
+              </p>
               <ul className="mt-2 divide-y divide-foreground/5">
                 {list.map((item) => {
                   const missing = item.target_qty - item.qty;
@@ -64,7 +72,9 @@ export function ShoppingList({ items, homes }: Props) {
                         <p className="text-sm font-semibold text-glow">
                           +{formatQty(missing)} {item.unit}
                         </p>
-                        <p className="text-xs text-mist">{currency.format(Number(item.price) * missing)}</p>
+                        <p className="text-xs text-mist">
+                          {currency.format(Number(item.price) * missing)}
+                        </p>
                       </div>
                     </li>
                   );

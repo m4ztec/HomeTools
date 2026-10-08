@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { ApiError, authApi, getAccessToken, pantryApi } from "@/lib/api";
-import { applySettings } from "@/lib/inventory";
+import { ApiError, getAccessToken } from "@/shared/lib/api-client";
+import { authApi } from "@/features/auth/api";
+import { pantryApi } from "@/features/pantry/api";
+import { applySettings } from "@/features/pantry/model";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,

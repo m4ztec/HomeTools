@@ -2,8 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronsUpDown, LogOut, UserRound } from "lucide-react";
-import { ProfileDialog } from "@/components/pantry/ProfileDialog";
-import { setAccessToken } from "@/lib/api";
+import { ProfileDialog } from "@/features/auth/ProfileDialog";
+import { setAccessToken } from "@/shared/lib/api-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +11,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useAddItem, useAllItems, useHomes, useItems } from "@/hooks/useHomes";
+import { useAddItem, useAllItems, useHomes, useItems } from "@/features/pantry/hooks";
 import {
   attentionScore,
   currency,
@@ -21,12 +21,12 @@ import {
   isExpiringSoon,
   isLow,
   SELECTED_HOME_KEY,
-} from "@/lib/inventory";
-import { ItemRow } from "@/components/pantry/ItemRow";
-import { ItemEditor } from "@/components/pantry/ItemEditor";
-import { HouseholdPanel } from "@/components/pantry/HouseholdPanel";
-import { HomeSetup } from "@/components/pantry/HomeSetup";
-import { ShoppingList } from "@/components/pantry/ShoppingList";
+} from "@/features/pantry/model";
+import { ItemRow } from "@/features/pantry/components/ItemRow";
+import { ItemEditor } from "@/features/pantry/components/ItemEditor";
+import { HouseholdPanel } from "@/features/pantry/components/HouseholdPanel";
+import { HomeSetup } from "@/features/pantry/components/HomeSetup";
+import { ShoppingList } from "@/features/pantry/components/ShoppingList";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({

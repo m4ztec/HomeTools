@@ -2,6 +2,14 @@
 
 Pantry is a shared household inventory app. The frontend is React/TanStack Start; its API, authentication, and persistence are provided by ASP.NET Core, ASP.NET Core Identity, and EF Core with PostgreSQL.
 
+## Project structure
+
+- `src/routes/` — TanStack file-based routes and route-level composition
+- `src/features/auth/` — sign-in, session, and profile functionality
+- `src/features/pantry/` — inventory models, API, queries, and pantry components
+- `src/shared/` — cross-feature API client, utilities, and UI primitives
+- `backend/Controllers/`, `Contracts/`, `Data/`, `Models/`, and `Services/` — ASP.NET API layers; EF migrations live under `Data/Migrations/`
+
 ## Requirements
 
 - Node.js 20+

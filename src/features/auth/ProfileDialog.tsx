@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { authApi, notifyAuthChanged } from "@/lib/api";
+import { notifyAuthChanged } from "@/shared/lib/api-client";
+import { authApi } from "./api";
 
 export function ProfileDialog({
   displayName,

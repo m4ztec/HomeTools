@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ApiError, authApi, getAccessToken, onAuthChanged, type AuthUser } from "@/lib/api";
+import { ApiError, getAccessToken, onAuthChanged } from "@/shared/lib/api-client";
+import { authApi, type AuthUser } from "./api";
 
 export function useSession() {
   const [user, setUser] = useState<AuthUser | null>(null);
