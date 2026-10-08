@@ -10,7 +10,6 @@ node_modules
 backend/bin
 backend/obj
 backend/App_Data
-frontend
 *.db
 *.db-shm
 *.db-wal

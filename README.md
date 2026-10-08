@@ -4,7 +4,7 @@ Pantry is a household inventory app with a React/TanStack frontend and an ASP.NE
 
 ## Self-host with Docker
 
-Docker Compose runs the frontend, API, and SQLite database together. The web app and API are available through one address; SQLite is stored in the persistent `pantry-data` Docker volume.
+Docker Compose builds and runs the frontend and API together in one image and container. The web app and API are available through one address; SQLite is stored in the persistent `pantry-data` Docker volume.
 
 ### Requirements
 
@@ -33,7 +33,7 @@ Docker Compose runs the frontend, API, and SQLite database together. The web app
 
 4. Open `http://localhost:8080` (or the port configured by `APP_PORT` in `.env`).
 
-The API applies database migrations and seeds its initial settings and roles when it starts. The first account registered becomes the administrator.
+The API applies database migrations and seeds its initial settings and roles when it starts. The first account registered becomes the administrator. The API listens only inside the container; the frontend forwards `/api/` requests to it.
 
 To stop the app while retaining its database, run `docker compose down`. The named volume `pantry-data` survives container rebuilds and restarts. To permanently delete the database as well, run `docker compose down --volumes`. Back up the `pantry-data` Docker volume regularly. For an internet-facing deployment, put the app behind a TLS-terminating reverse proxy and use a strong, private `JWT_KEY`.
 

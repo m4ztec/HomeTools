@@ -1,9 +1,0 @@
-.git
-.github
-.vscode
-.output
-.tanstack
-.vinxi
-.nitro
-dist
-node_modules
