@@ -8,6 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+backend/bin/
+backend/obj/
+backend/.vs/
 dist
 dist-ssr
 .output

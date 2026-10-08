@@ -12,7 +12,7 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { supabase } from "@/integrations/supabase/client";
+import { onAuthChanged } from "@/lib/api";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -81,9 +81,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Pantry — Household stock, kept in order" },
-      { name: "description", content: "Track what you have at home, what you want to keep stocked, and what expires soon. Share homes with your partner or family." },
+      {
+        name: "description",
+        content:
+          "Track what you have at home, what you want to keep stocked, and what expires soon. Share homes with your partner or family.",
+      },
       { property: "og:title", content: "Pantry — Household stock, kept in order" },
-      { property: "og:description", content: "Track what you have at home, what you want to keep stocked, and what expires soon." },
+      {
+        property: "og:description",
+        content:
+          "Track what you have at home, what you want to keep stocked, and what expires soon.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -123,12 +131,10 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+    return onAuthChanged(() => {
       router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      queryClient.invalidateQueries();
     });
-    return () => data.subscription.unsubscribe();
   }, [router, queryClient]);
 
   return (

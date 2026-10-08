@@ -1,28 +1,56 @@
-# Home Inventory Hub
+# Pantry
 
-make a app to track what products in ones home, 
-it should a list of the items at home with thier prices, how many I have and how many i want to have at all times
-items can be prerishable, it milk expires at X data
-the app should have auth,
-the homes should be shareable, for example an couple have two accounts, they share their apartment, and they may have their respective parents homes
+Pantry is a shared household inventory app. The frontend is React/TanStack Start; its API, authentication, and persistence are provided by ASP.NET Core, ASP.NET Core Identity, and EF Core with PostgreSQL.
 
-This project was built with [Lovable](https://lovable.dev).
+## Requirements
 
-## Build with Lovable
+- Node.js 20+
+- .NET 10 SDK
+- PostgreSQL 14+
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/27db5831-a7a7-4fb1-b21b-90d0c9080b51).
+## Run locally
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+1. Create an empty PostgreSQL database (for example, `pantry`).
+2. Configure the API secrets. From the repository root in PowerShell:
 
-## Development
+   ```powershell
+   dotnet user-secrets init --project backend/Pantry.Api.csproj
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=pantry;Username=postgres;Password=<your-password>" --project backend/Pantry.Api.csproj
+   $key = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+   dotnet user-secrets set "Jwt:Key" $key --project backend/Pantry.Api.csproj
+   ```
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+3. Install frontend dependencies:
+
+   ```powershell
+   npm install
+   ```
+
+4. Start the API and frontend in separate terminals:
+
+   ```powershell
+   npm run dev:api
+   ```
+
+   ```powershell
+   npm run dev
+   ```
+
+   The API listens on `http://localhost:5050`; the frontend defaults to that URL. Set `VITE_API_URL` when the API is hosted elsewhere. Add the deployed frontend origin to `AllowedOrigins` in `backend/appsettings.json`.
+
+EF Core applies database migrations at API startup and seeds default settings and the built-in roles. The first account registered is made the administrator; subsequent accounts receive the regular user role. Account registration and sign-in use ASP.NET Core Identity, with 12-hour bearer tokens.
+
+## Data migration
+
+The API is configured for a **fresh PostgreSQL database** and creates its own `identity` and `pantry` schemas. Existing Supabase users and inventory are not imported. Supabase password credentials are not transferable to ASP.NET Core Identity, so users must register new accounts. Export any data that should be retained before switching over.
+
+## Frontend
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+npm install
 npm run dev
+npm run lint
+npm run build
 ```
+
+The API can be built independently with `npm run build:api`.
