@@ -7,8 +7,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
-    "dev:api": "dotnet run --project backend/Pantry.Api.csproj",
-    "build:api": "dotnet build backend/Pantry.Api.csproj",
+    "dev:api": "cd ../backend && dotnet run",
+    "build:api": "dotnet build ../backend/Pantry.Api.csproj",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write ."

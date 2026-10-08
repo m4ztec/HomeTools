@@ -7,7 +7,7 @@
       "command": "npm",
       "args": ["install"],
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/frontend"
       },
       "problemMatcher": []
     },

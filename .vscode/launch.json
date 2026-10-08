@@ -19,6 +19,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "http://localhost:5050",
         "Jwt__Key": "Pantry-local-development-only-signing-key-2026!"
+      },
+      "logging": {
+        "moduleLoad": false
       }
     },
     {
@@ -27,6 +30,7 @@
       "request": "launch",
       "preLaunchTask": "Install frontend dependencies",
       "command": "npm run dev",
+      "cwd": "${workspaceFolder}/frontend",
       "serverReadyAction": {
         "action": "openIntegratedBrowser",
         "pattern": "Local:\\s+(https?://\\S+)"

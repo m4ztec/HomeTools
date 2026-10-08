@@ -1,6 +1,6 @@
 const TOKEN_KEY = "pantry:access-token";
 const AUTH_EVENT = "pantry:auth-changed";
-const API_URL = (import.meta.env["VITE_API_URL"] || "http://localhost:5050").replace(/\/$/, "");
+const API_URL = (import.meta.env["VITE_API_URL"] ?? "http://localhost:5050").replace(/\/$/, "");
 
 export class ApiError extends Error {
   constructor(
