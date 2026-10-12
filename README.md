@@ -6,6 +6,18 @@ HomeTools is a collection of household services with a React/TanStack frontend a
 
 Docker Compose builds and runs the frontend and API together in one image and container. The web app and API are available through one address; SQLite is stored in the persistent `pantry-data` Docker volume.
 
+### Automatically built image
+
+GitHub Actions builds the Docker image for pull requests to `main` and publishes it to GitHub Container Registry when changes are pushed to `main`, a `v*` tag is pushed, or the workflow is run manually. Published images are named `ghcr.io/m4ztec/hometools` and include branch or version tags, a commit-SHA tag, and `latest` for the default branch.
+
+Pull the latest published image with:
+
+```sh
+docker pull ghcr.io/m4ztec/hometools:latest
+```
+
+The package's visibility is managed in the repository's GitHub Packages settings. Make it public there if the image should be pullable without authentication.
+
 ### Requirements
 
 - Docker Engine with the Compose plugin, or Docker Desktop
