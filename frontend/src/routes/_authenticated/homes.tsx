@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowDownRight, ArrowUpRight, Calculator, Home as HomeIcon, Plus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Calculator, Home as HomeIcon, Plus, TrendingUp } from "lucide-react";
 import { useAllItems, useHomes } from "@/features/pantry/hooks";
 import {
   currency,
@@ -19,12 +19,14 @@ export const Route = createFileRoute("/_authenticated/homes")({
       { title: "Your services — HomeTools" },
       {
         name: "description",
-        content: "Your HomeTools dashboard for household inventory and Portuguese IRS estimates.",
+        content:
+          "Your HomeTools dashboard for household inventory, Portuguese IRS estimates, and average-cost trade tracking.",
       },
       { property: "og:title", content: "HomeTools — Your services" },
       {
         property: "og:description",
-        content: "Manage your homes with Pantry or plan with the Portuguese IRS simulator.",
+        content:
+          "Manage your homes with Pantry, plan with the Portuguese IRS simulator, or track average-cost trades.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -93,7 +95,7 @@ function HomesPage() {
         <section
           id="services"
           aria-label="HomeTools services"
-          className="mt-7 grid gap-4 lg:grid-cols-2"
+          className="mt-7 grid gap-4 lg:grid-cols-3"
         >
           <a
             href="#pantry"
@@ -138,6 +140,29 @@ function HomesPage() {
             </p>
             <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
               Open simulator <ArrowUpRight className="size-4 text-glow" />
+            </span>
+          </Link>
+
+          <Link
+            to="/trade-tracker"
+            className="glass group rounded-3xl p-5 transition-colors hover:ring-1 hover:ring-glow/40 sm:p-6"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="grid size-11 place-items-center rounded-xl bg-glow/10 text-glow">
+                <TrendingUp className="size-5" />
+              </div>
+              <ArrowUpRight className="size-4 text-mist transition group-hover:text-foreground" />
+            </div>
+            <p className="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-glow">
+              Money & planning
+            </p>
+            <h2 className="mt-1 text-xl font-semibold">Average Cost Trade Tracker</h2>
+            <p className="mt-2 max-w-lg text-sm leading-6 text-mist">
+              Keep track of trades, monitor average cost basis, and understand portfolio performance
+              over time.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
+              Open tracker <ArrowUpRight className="size-4 text-glow" />
             </span>
           </Link>
         </section>

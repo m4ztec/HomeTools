@@ -17,7 +17,7 @@ import {
 type AppNavbarProps = {
   user: AuthUser;
   isAdmin: boolean;
-  active?: "services" | "pantry" | "irs" | "admin";
+  active?: "services" | "pantry" | "irs" | "trades" | "admin";
   actions?: ReactNode;
 };
 
@@ -76,6 +76,13 @@ export function AppNavbar({ user, isAdmin, active, actions }: AppNavbarProps) {
             className={`whitespace-nowrap rounded-full px-3 py-2 text-sm transition-colors hover:bg-white/5 hover:text-foreground ${active === "irs" ? "bg-white/5 text-foreground" : "text-mist"}`}
           >
             IRS simulator
+          </Link>
+          <Link
+            to="/trade-tracker"
+            aria-current={active === "trades" ? "page" : undefined}
+            className={`whitespace-nowrap rounded-full px-3 py-2 text-sm transition-colors hover:bg-white/5 hover:text-foreground ${active === "trades" ? "bg-white/5 text-foreground" : "text-mist"}`}
+          >
+            Trade tracker
           </Link>
         </nav>
 
