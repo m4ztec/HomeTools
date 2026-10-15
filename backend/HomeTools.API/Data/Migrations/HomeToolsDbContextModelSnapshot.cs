@@ -125,6 +125,91 @@ namespace HomeTools.API.Data.Migrations
                     b.ToTable("irs_scenarios", (string)null);
                 });
 
+            modelBuilder.Entity("HomeTools.API.Services.TradeTracker.Models.TrackedAsset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("CurrentPrice")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "Symbol")
+                        .IsUnique();
+
+                    b.ToTable("tracked_assets", (string)null);
+                });
+
+            modelBuilder.Entity("HomeTools.API.Services.TradeTracker.Models.Trade", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Fees")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(240)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Side")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("TradedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId", "TradedAt", "CreatedAt");
+
+                    b.ToTable("trades", (string)null);
+                });
+
             modelBuilder.Entity("HomeTools.API.Services.Pantry.Models.AppSettings", b =>
                 {
                     b.Property<bool>("Id")
@@ -425,6 +510,17 @@ namespace HomeTools.API.Data.Migrations
                     b.Navigation("Home");
                 });
 
+            modelBuilder.Entity("HomeTools.API.Services.TradeTracker.Models.Trade", b =>
+                {
+                    b.HasOne("HomeTools.API.Services.TradeTracker.Models.TrackedAsset", "Asset")
+                        .WithMany("Trades")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -481,6 +577,11 @@ namespace HomeTools.API.Data.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("HomeTools.API.Services.TradeTracker.Models.TrackedAsset", b =>
+                {
+                    b.Navigation("Trades");
                 });
 #pragma warning restore 612, 618
         }

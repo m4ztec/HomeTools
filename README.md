@@ -1,6 +1,6 @@
 # HomeTools
 
-HomeTools is a collection of household services with a React/TanStack frontend and an ASP.NET Core API using Entity Framework Core, Identity, and SQLite. It currently includes Pantry inventory and a Portuguese IRS estimator.
+HomeTools is a collection of household services with a React/TanStack frontend and an ASP.NET Core API using Entity Framework Core, Identity, and SQLite. It includes Pantry inventory, a Portuguese IRS estimator, and an authenticated average-cost trade tracker with user-owned trade history and portfolio performance.
 
 ## Self-host with Docker
 
@@ -49,6 +49,8 @@ The API applies database migrations and seeds its initial settings and roles whe
 
 The authenticated **IRS simulator** provides planning estimates for 2026 income in mainland Portugal, Madeira, and the Azores. Users can save and update their own scenarios. Its feature scope was informed by [simulador-irs](https://github.com/m4ztec/simulador-irs). Results are estimates for educational planning only, not official tax advice.
 
+The authenticated **Average Cost Trade Tracker** lets users create tracked assets and record multiple buys and sells for each asset at separate prices and dates/times. It calculates weighted average cost basis and realized profit/loss (including fees), and tracks unrealized performance against manually entered market prices. It supports long positions only; market prices are not live quotes, and results are not investment or tax advice.
+
 To stop the app while retaining its database, run `docker compose down`. The named volume `pantry-data` survives container rebuilds and restarts. To permanently delete the database as well, run `docker compose down --volumes`. Back up the `pantry-data` Docker volume regularly. For an internet-facing deployment, put the app behind a TLS-terminating reverse proxy and use a strong, private `JWT_KEY`.
 
 ## Run locally in VS Code
@@ -96,7 +98,9 @@ From the `frontend/` folder, you can run `npm install` then `npm run dev` and `n
 - `backend/HomeTools.API/Services/Authentication/` — identity, profile, and token functionality
 - `backend/HomeTools.API/Services/Pantry/` — pantry endpoints, contracts, and domain models
 - `backend/HomeTools.API/Services/Irs/` — IRS estimate calculations and user-owned saved scenarios
+- `backend/HomeTools.API/Services/TradeTracker/` — user-owned trade history and average-cost portfolio calculations
 - `frontend/src/features/irs/` — IRS simulator API client and interface
+- `frontend/src/features/trade-tracker/` — trade tracker API client and interface
 - `deploy/` — container process entrypoint
 
 ## Useful commands

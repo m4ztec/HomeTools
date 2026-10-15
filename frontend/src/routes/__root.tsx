@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "A self-hosted collection of household services, including Pantry and an IRS estimator.",
+          "A self-hosted collection of household services, including Pantry, an IRS estimator, and an average cost trade tracker.",
       },
       { property: "og:title", content: "HomeTools — Practical tools for home" },
       {
         property: "og:description",
         content:
-          "A self-hosted collection of household services, including Pantry and an IRS estimator.",
+          "A self-hosted collection of household services, including Pantry, an IRS estimator, and an average cost trade tracker.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

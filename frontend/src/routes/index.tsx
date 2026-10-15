@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { ArrowDownRight, ArrowUpRight, Calculator, House, Layers3 } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Calculator, House, Layers3, TrendingUp } from "lucide-react";
 import { useSession } from "@/features/auth/useSession";
 
 export const Route = createFileRoute("/")({
@@ -9,13 +9,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A growing collection of practical home services: manage household stock with Pantry and explore Portuguese tax estimates with the IRS simulator.",
+          "A growing collection of practical home services: manage household stock with Pantry, explore Portuguese tax estimates with the IRS simulator, and track average cost trades with a dedicated portfolio app.",
       },
       { property: "og:title", content: "HomeTools — Useful tools for everyday home life" },
       {
         property: "og:description",
         content:
-          "A growing collection of practical home services: manage household stock with Pantry and explore Portuguese tax estimates with the IRS simulator.",
+          "A growing collection of practical home services: manage household stock with Pantry, explore Portuguese tax estimates with the IRS simulator, and track average cost trades with a dedicated portfolio app.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -67,7 +67,7 @@ function Index() {
               </h1>
               <p className="mt-6 max-w-xl text-base leading-7 text-mist sm:text-lg">
                 HomeTools brings useful services together in one place — from keeping your household
-                stocked to planning your Portuguese IRS.
+                stocked and planning your Portuguese IRS to tracking average-cost trades over time.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 {loading ? (
@@ -119,6 +119,16 @@ function Index() {
                     </div>
                     <ArrowUpRight className="size-4 text-mist" />
                   </div>
+                  <div className="flex items-center gap-4 rounded-2xl bg-glass-fill p-4">
+                    <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-glow/10 text-glow">
+                      <TrendingUp className="size-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">Trade tracker</p>
+                      <p className="mt-1 text-sm text-mist">Average cost &amp; portfolio P&amp;L</p>
+                    </div>
+                    <ArrowUpRight className="size-4 text-mist" />
+                  </div>
                 </div>
                 <div className="mt-5 flex items-center gap-3 rounded-2xl border border-dashed border-glass-line p-4">
                   <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/5 text-mist">
@@ -148,7 +158,7 @@ function Index() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <ServiceCard
                 icon={<House className="size-5" />}
                 number="01"
@@ -173,6 +183,20 @@ function Index() {
                   "Portuguese IRS estimates",
                   "Save and compare scenarios",
                   "Clearly marked as an estimate",
+                ]}
+                color="glow"
+                to="/auth"
+              />
+              <ServiceCard
+                icon={<TrendingUp className="size-5" />}
+                number="03"
+                category="Money & planning"
+                title="Average Cost Trade Tracker"
+                description="Track your trades, monitor average cost basis, and keep a clear view of portfolio performance over time."
+                highlights={[
+                  "Average cost calculations",
+                  "Trade activity tracking",
+                  "Portfolio overview at a glance",
                 ]}
                 color="glow"
                 to="/auth"
@@ -217,12 +241,11 @@ function ServiceCard({
 }: ServiceCardProps) {
   const accent = color === "mint" ? "text-mint" : "text-glow";
   const iconBg = color === "mint" ? "bg-mint/10" : "bg-glow/10";
+  const cardClasses =
+    "glass group flex h-full flex-col rounded-3xl p-6 transition duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-glow/40 sm:p-8";
 
-  return (
-    <Link
-      to={to}
-      className="glass group flex h-full flex-col rounded-3xl p-6 transition duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-glow/40 sm:p-8"
-    >
+  const content = (
+    <>
       <div className="flex items-start justify-between">
         <div className={`grid size-12 place-items-center rounded-2xl ${iconBg} ${accent}`}>
           {icon}
@@ -246,6 +269,12 @@ function ServiceCard({
       <span className="mt-7 text-sm font-medium text-foreground">
         Sign in to open <span className={accent}>→</span>
       </span>
+    </>
+  );
+
+  return (
+    <Link to={to} className={cardClasses}>
+      {content}
     </Link>
   );
 }

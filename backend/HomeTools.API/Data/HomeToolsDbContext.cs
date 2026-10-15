@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using HomeTools.API.Services.Authentication;
 using HomeTools.API.Services.Irs.Models;
 using HomeTools.API.Services.Pantry.Models;
+using HomeTools.API.Services.TradeTracker.Models;
 
 namespace HomeTools.API.Data;
 
@@ -29,6 +30,8 @@ public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> opti
     public DbSet<Item> Items => Set<Item>();
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
     public DbSet<IrsScenario> IrsScenarios => Set<IrsScenario>();
+    public DbSet<TrackedAsset> TrackedAssets => Set<TrackedAsset>();
+    public DbSet<Trade> Trades => Set<Trade>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -106,6 +109,31 @@ public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> opti
             entity.Property(scenario => scenario.InputJson).IsRequired();
             entity.Property(scenario => scenario.ResultJson).IsRequired();
             entity.HasIndex(scenario => new { scenario.OwnerId, scenario.UpdatedAt });
+        });
+        builder.Entity<TrackedAsset>(entity =>
+        {
+            entity.ToTable("tracked_assets");
+            entity.HasKey(asset => asset.Id);
+            entity.Property(asset => asset.Symbol).HasMaxLength(20).IsRequired();
+            entity.Property(asset => asset.Name).HasMaxLength(80).IsRequired();
+            entity.Property(asset => asset.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(asset => asset.CurrentPrice).HasPrecision(18, 8);
+            entity.HasIndex(asset => new { asset.OwnerId, asset.Symbol }).IsUnique();
+            entity.HasMany(asset => asset.Trades)
+                .WithOne(trade => trade.Asset)
+                .HasForeignKey(trade => trade.AssetId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<Trade>(entity =>
+        {
+            entity.ToTable("trades");
+            entity.HasKey(trade => trade.Id);
+            entity.Property(trade => trade.Side).HasMaxLength(4).IsRequired();
+            entity.Property(trade => trade.Quantity).HasPrecision(18, 8);
+            entity.Property(trade => trade.UnitPrice).HasPrecision(18, 8);
+            entity.Property(trade => trade.Fees).HasPrecision(18, 8);
+            entity.Property(trade => trade.Notes).HasMaxLength(240);
+            entity.HasIndex(trade => new { trade.AssetId, trade.TradedAt, trade.CreatedAt });
         });
     }
 }

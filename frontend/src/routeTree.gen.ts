@@ -16,6 +16,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedHomesRouteImport } from './routes/_authenticated/homes'
 import { Route as AuthenticatedIrsRouteImport } from './routes/_authenticated/irs'
+import { Route as AuthenticatedTradeTrackerRouteImport } from './routes/_authenticated/trade-tracker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +52,12 @@ const AuthenticatedIrsRoute = AuthenticatedIrsRouteImport.update({
   path: '/irs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTradeTrackerRoute =
+  AuthenticatedTradeTrackerRouteImport.update({
+    id: '/trade-tracker',
+    path: '/trade-tracker',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/homes': typeof AuthenticatedHomesRoute
   '/irs': typeof AuthenticatedIrsRoute
+  '/trade-tracker': typeof AuthenticatedTradeTrackerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppRoute
   '/homes': typeof AuthenticatedHomesRoute
   '/irs': typeof AuthenticatedIrsRoute
+  '/trade-tracker': typeof AuthenticatedTradeTrackerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,12 +86,14 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/homes': typeof AuthenticatedHomesRoute
   '/_authenticated/irs': typeof AuthenticatedIrsRoute
+  '/_authenticated/trade-tracker': typeof AuthenticatedTradeTrackerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs'
+  fullPaths:
+    '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs'
+  to: '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
   id:
     | '__root__'
     | '/'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/homes'
     | '/_authenticated/irs'
+    | '/_authenticated/trade-tracker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -151,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIrsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/trade-tracker': {
+      id: '/_authenticated/trade-tracker'
+      path: '/trade-tracker'
+      fullPath: '/trade-tracker'
+      preLoaderRoute: typeof AuthenticatedTradeTrackerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -159,6 +178,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedHomesRoute: typeof AuthenticatedHomesRoute
   AuthenticatedIrsRoute: typeof AuthenticatedIrsRoute
+  AuthenticatedTradeTrackerRoute: typeof AuthenticatedTradeTrackerRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -166,6 +186,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedHomesRoute: AuthenticatedHomesRoute,
   AuthenticatedIrsRoute: AuthenticatedIrsRoute,
+  AuthenticatedTradeTrackerRoute: AuthenticatedTradeTrackerRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
