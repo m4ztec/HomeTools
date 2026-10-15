@@ -37,7 +37,7 @@ The API applies database migrations and seeds its initial settings and roles whe
 
 The authenticated **IRS simulator** provides planning estimates for 2026 income in mainland Portugal, Madeira, and the Azores. Users can save and update their own scenarios. Its feature scope was informed by [simulador-irs](https://github.com/m4ztec/simulador-irs). Results are estimates for educational planning only, not official tax advice.
 
-The authenticated **Average Cost Trade Tracker** records buys and sells, calculates weighted average cost basis and realized profit/loss (including fees), and tracks unrealized performance against manually entered market prices. It supports long positions only; market prices are not live quotes, and results are not investment or tax advice.
+The authenticated **Average Cost Trade Tracker** lets users create tracked assets and record multiple buys and sells for each asset at separate prices and dates/times. It calculates weighted average cost basis and realized profit/loss (including fees), and tracks unrealized performance against manually entered market prices. It supports long positions only; market prices are not live quotes, and results are not investment or tax advice.
 
 To stop the app while retaining its database, run `docker compose down`. The named volume `pantry-data` survives container rebuilds and restarts. To permanently delete the database as well, run `docker compose down --volumes`. Back up the `pantry-data` Docker volume regularly. For an internet-facing deployment, put the app behind a TLS-terminating reverse proxy and use a strong, private `JWT_KEY`.
 

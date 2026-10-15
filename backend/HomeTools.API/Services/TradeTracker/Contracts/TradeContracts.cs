@@ -1,9 +1,9 @@
 namespace HomeTools.API.Services.TradeTracker.Contracts;
 
+public sealed record CreateTrackedAssetRequest(string Symbol, string? Name, string Currency);
+
 public sealed record CreateTradeRequest(
-    string Symbol,
-    string? Name,
-    string Currency,
+    Guid AssetId,
     string Side,
     decimal Quantity,
     decimal UnitPrice,

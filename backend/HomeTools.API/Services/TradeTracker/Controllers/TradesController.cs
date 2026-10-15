@@ -31,39 +31,49 @@ public sealed partial class TradesController(
         return Ok(BuildDashboard(assets));
     }
 
-    [HttpPost]
-    public async Task<ActionResult<TradeDto>> Create(CreateTradeRequest request)
+    [HttpPost("assets")]
+    public async Task<ActionResult<TrackedAssetDto>> CreateAsset(CreateTrackedAssetRequest request)
     {
         var validationError = Validate(request);
         if (validationError is not null) return BadRequest(new { message = validationError });
 
         var ownerId = CurrentUserId();
         var symbol = request.Symbol.Trim().ToUpperInvariant();
-        var currency = request.Currency.Trim().ToUpperInvariant();
-        var asset = await db.TrackedAssets
-            .Include(value => value.Trades)
-            .SingleOrDefaultAsync(value => value.OwnerId == ownerId && value.Symbol == symbol);
-        var isNewAsset = asset is null;
+        var exists = await db.TrackedAssets
+            .AnyAsync(asset => asset.OwnerId == ownerId && asset.Symbol == symbol);
+        if (exists) return Conflict(new { message = $"You are already tracking {symbol}." });
 
-        if (asset is not null && asset.Currency != currency)
-        {
-            return BadRequest(new { message = $"The tracked currency for {symbol} is {asset.Currency}." });
-        }
-
-        asset ??= new TrackedAsset
+        var asset = new TrackedAsset
         {
             OwnerId = ownerId,
             Symbol = symbol,
-            Name = symbol,
-            Currency = currency,
+            Name = string.IsNullOrWhiteSpace(request.Name) ? symbol : request.Name.Trim(),
+            Currency = request.Currency.Trim().ToUpperInvariant(),
         };
-        if (db.Entry(asset).State == EntityState.Detached) db.TrackedAssets.Add(asset);
-        if (!string.IsNullOrWhiteSpace(request.Name)) asset.Name = request.Name.Trim();
-        if (isNewAsset) asset.UpdatedAt = DateTimeOffset.UtcNow;
+        db.TrackedAssets.Add(asset);
+        await db.SaveChangesAsync();
+
+        var ledger = CalculateLedger([]);
+        return CreatedAtAction(
+            nameof(GetDashboard),
+            ToAssetDto(asset, ledger));
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<TradeDto>> Create(CreateTradeRequest request)
+    {
+        var validationError = Validate(request);
+        if (validationError is not null) return BadRequest(new { message = validationError });
+
+        var asset = await db.TrackedAssets
+            .Include(value => value.Trades)
+            .SingleOrDefaultAsync(value =>
+                value.Id == request.AssetId && value.OwnerId == CurrentUserId());
+        if (asset is null) return NotFound(new { message = "Tracked asset not found." });
 
         var trade = new Trade
         {
-            Asset = asset,
+            AssetId = asset.Id,
             Side = request.Side,
             Quantity = request.Quantity,
             UnitPrice = request.UnitPrice,
@@ -75,9 +85,10 @@ public sealed partial class TradesController(
         var ledger = CalculateLedger(asset.Trades.Append(trade));
         if (ledger.Error is not null) return BadRequest(new { message = ledger.Error });
 
-        asset.Trades.Add(trade);
+        db.Trades.Add(trade);
         try
         {
+            asset.UpdatedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException exception)
@@ -93,7 +104,7 @@ public sealed partial class TradesController(
             });
             logger.LogError(exception,
                 "Trade creation concurrency failure for {Symbol}. Affected entries: {Entries}",
-                symbol, string.Join("; ", entries));
+                asset.Symbol, string.Join("; ", entries));
 
             return Conflict(new
             {
@@ -158,7 +169,7 @@ public sealed partial class TradesController(
         return NoContent();
     }
 
-    private static string? Validate(CreateTradeRequest request)
+    private static string? Validate(CreateTrackedAssetRequest request)
     {
         var symbol = request.Symbol.Trim().ToUpperInvariant();
         if (!SymbolPattern().IsMatch(symbol))
@@ -166,6 +177,12 @@ public sealed partial class TradesController(
         if (request.Name?.Trim().Length > 80) return "Asset name must be 80 characters or fewer.";
         if (request.Currency.Trim().Length != 3 || !request.Currency.Trim().All(char.IsAsciiLetter))
             return "Currency must be a three-letter code, such as EUR or USD.";
+        return null;
+    }
+
+    private static string? Validate(CreateTradeRequest request)
+    {
+        if (request.AssetId == Guid.Empty) return "Choose a tracked asset.";
         if (request.Side is not ("Buy" or "Sell")) return "Trade side must be Buy or Sell.";
         if (request.Quantity <= 0 || request.Quantity > MaximumAmount)
             return "Quantity must be greater than zero and within the supported range.";

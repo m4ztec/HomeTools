@@ -1,9 +1,13 @@
 import { apiRequest } from "@/shared/lib/api-client";
 
-export type TradeInput = {
+export type AssetInput = {
   symbol: string;
   name: string;
   currency: string;
+};
+
+export type TradeInput = {
+  assetId: string;
   side: "Buy" | "Sell";
   quantity: number;
   unitPrice: number;
@@ -49,6 +53,11 @@ export type TradeDashboard = {
 
 export const tradeTrackerApi = {
   dashboard: () => apiRequest<TradeDashboard>("/trades"),
+  createAsset: (asset: AssetInput) =>
+    apiRequest<TrackedAsset>("/trades/assets", {
+      method: "POST",
+      body: JSON.stringify(asset),
+    }),
   createTrade: (trade: TradeInput) =>
     apiRequest<Trade>("/trades", {
       method: "POST",
