@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDownRight, ArrowUpRight, Plus, Trash2, TrendingUp } from "lucide-react";
-import { useMemo, type FormEvent } from "react";
+import { useMemo, useRef, type FormEvent } from "react";
 import { toast } from "sonner";
 import type { AuthUser } from "@/features/auth/api";
 import { tradeTrackerApi, type Trade, type TrackedAsset } from "./api";
@@ -28,6 +28,7 @@ function profitClass(value: number) {
 
 export function TradeTrackerPage({ user }: { user: AuthUser }) {
   const queryClient = useQueryClient();
+  const tradeFormRef = useRef<HTMLFormElement>(null);
   const dashboard = useQuery({
     queryKey: ["trade-tracker"],
     queryFn: tradeTrackerApi.dashboard,
@@ -53,12 +54,18 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
 
   const addTrade = useMutation({
     mutationFn: tradeTrackerApi.createTrade,
-    onSuccess: () => {
+    onSuccess: (_trade, input) => {
       void queryClient.invalidateQueries({ queryKey: ["trade-tracker"] });
       toast.success("Trade added");
-      document.getElementById("trade-form")?.reset();
-      const dateInput = document.getElementById("traded-at");
-      if (dateInput instanceof HTMLInputElement) dateInput.value = localDateTimeNow();
+      const form = tradeFormRef.current;
+      form?.reset();
+      if (form) {
+        setFormFieldValue(form, "symbol", input.symbol);
+        setFormFieldValue(form, "name", input.name);
+        setFormFieldValue(form, "currency", input.currency);
+        setFormFieldValue(form, "side", input.side);
+        setFormFieldValue(form, "tradedAt", localDateTimeNow());
+      }
     },
     onError: (error) => toast.error(error.message),
   });
@@ -97,6 +104,21 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
       tradedAt: new Date(tradedAt).toISOString(),
       notes: String(form.get("notes")).trim(),
     });
+  }
+
+  function beginTrade(asset: TrackedAsset, side: "Buy" | "Sell") {
+    const form = tradeFormRef.current;
+    if (!form) return;
+
+    setFormFieldValue(form, "symbol", asset.symbol);
+    setFormFieldValue(form, "name", asset.name);
+    setFormFieldValue(form, "currency", asset.currency);
+    setFormFieldValue(form, "side", side);
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    const quantityField = form.elements.namedItem("quantity");
+    if (quantityField instanceof HTMLInputElement) {
+      quantityField.focus({ preventScroll: true });
+    }
   }
 
   function removeTrade(trade: Trade) {
@@ -197,7 +219,7 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
               </p>
             ) : (
               <div className="mt-4 overflow-x-auto">
-                <table className="w-full min-w-[780px] text-left text-sm">
+                <table className="w-full min-w-[900px] text-left text-sm">
                   <thead className="border-b border-glass-line text-xs text-mist">
                     <tr>
                       <th className="pb-3 pr-4 font-medium">Asset</th>
@@ -207,6 +229,7 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
                       <th className="pb-3 pr-4 font-medium">Market price</th>
                       <th className="pb-3 pr-4 text-right font-medium">Unrealized P&amp;L</th>
                       <th className="pb-3 text-right font-medium">Realized P&amp;L</th>
+                      <th className="pb-3 pl-4 text-right font-medium">Trade</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-glass-line">
@@ -216,6 +239,7 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
                         asset={asset}
                         updating={updatePrice.isPending}
                         onUpdatePrice={(price) => updatePrice.mutate({ assetId: asset.id, price })}
+                        onTrade={(side) => beginTrade(asset, side)}
                       />
                     ))}
                   </tbody>
@@ -228,7 +252,12 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
             <h2 className="flex items-center gap-2 font-semibold">
               <Plus className="size-4 text-glow" /> Add a trade
             </h2>
-            <form id="trade-form" onSubmit={submitTrade} className="mt-4 space-y-3">
+            <form
+              id="trade-form"
+              ref={tradeFormRef}
+              onSubmit={submitTrade}
+              className="mt-4 space-y-3"
+            >
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Symbol">
                   <input
@@ -426,14 +455,23 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function setFormFieldValue(form: HTMLFormElement, name: string, value: string) {
+  const field = form.elements.namedItem(name);
+  if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+    field.value = value;
+  }
+}
+
 function AssetRow({
   asset,
   updating,
   onUpdatePrice,
+  onTrade,
 }: {
   asset: TrackedAsset;
   updating: boolean;
   onUpdatePrice: (price: number) => void;
+  onTrade: (side: "Buy" | "Sell") => void;
 }) {
   function submitPrice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -481,6 +519,27 @@ function AssetRow({
       </td>
       <td className={`py-3 text-right ${profitClass(asset.realizedProfitLoss)}`}>
         {currency(asset.realizedProfitLoss, asset.currency)}
+      </td>
+      <td className="py-3 pl-4">
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            className="rounded-lg bg-mint/10 px-2.5 py-2 text-xs font-medium text-mint transition-colors hover:bg-mint/20"
+            onClick={() => onTrade("Buy")}
+            aria-label={`Buy more ${asset.symbol}`}
+          >
+            Buy
+          </button>
+          <button
+            type="button"
+            className="rounded-lg bg-rose/10 px-2.5 py-2 text-xs font-medium text-rose transition-colors hover:bg-rose/20 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => onTrade("Sell")}
+            aria-label={`Sell ${asset.symbol}`}
+            disabled={asset.quantity <= 0}
+          >
+            Sell
+          </button>
+        </div>
       </td>
     </tr>
   );

@@ -52,11 +52,12 @@ const AuthenticatedIrsRoute = AuthenticatedIrsRouteImport.update({
   path: '/irs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedTradeTrackerRoute = AuthenticatedTradeTrackerRouteImport.update({
-  id: '/trade-tracker',
-  path: '/trade-tracker',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AuthenticatedTradeTrackerRoute =
+  AuthenticatedTradeTrackerRouteImport.update({
+    id: '/trade-tracker',
+    path: '/trade-tracker',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,7 +90,8 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
+  fullPaths:
+    '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
   id:

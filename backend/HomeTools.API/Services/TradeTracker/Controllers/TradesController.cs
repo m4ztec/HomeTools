@@ -12,7 +12,9 @@ namespace HomeTools.API.Services.TradeTracker.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/trades")]
-public sealed partial class TradesController(HomeToolsDbContext db) : ControllerBase
+public sealed partial class TradesController(
+    HomeToolsDbContext db,
+    ILogger<TradesController> logger) : ControllerBase
 {
     private const decimal MaximumAmount = 9_999_999_999m;
 
@@ -41,6 +43,7 @@ public sealed partial class TradesController(HomeToolsDbContext db) : Controller
         var asset = await db.TrackedAssets
             .Include(value => value.Trades)
             .SingleOrDefaultAsync(value => value.OwnerId == ownerId && value.Symbol == symbol);
+        var isNewAsset = asset is null;
 
         if (asset is not null && asset.Currency != currency)
         {
@@ -56,7 +59,7 @@ public sealed partial class TradesController(HomeToolsDbContext db) : Controller
         };
         if (db.Entry(asset).State == EntityState.Detached) db.TrackedAssets.Add(asset);
         if (!string.IsNullOrWhiteSpace(request.Name)) asset.Name = request.Name.Trim();
-        asset.UpdatedAt = DateTimeOffset.UtcNow;
+        if (isNewAsset) asset.UpdatedAt = DateTimeOffset.UtcNow;
 
         var trade = new Trade
         {
@@ -73,7 +76,31 @@ public sealed partial class TradesController(HomeToolsDbContext db) : Controller
         if (ledger.Error is not null) return BadRequest(new { message = ledger.Error });
 
         asset.Trades.Add(trade);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException exception)
+        {
+            var entries = exception.Entries.Select(entry =>
+            {
+                var key = entry.Metadata.FindPrimaryKey();
+                var keyValues = key is null
+                    ? "unknown"
+                    : string.Join(", ", key.Properties.Select(property =>
+                        $"{property.Name}={entry.Property(property.Name).CurrentValue}"));
+                return $"{entry.Metadata.ClrType.Name} ({entry.State}; {keyValues})";
+            });
+            logger.LogError(exception,
+                "Trade creation concurrency failure for {Symbol}. Affected entries: {Entries}",
+                symbol, string.Join("; ", entries));
+
+            return Conflict(new
+            {
+                message = "The trade could not be saved because the tracked asset changed. Please retry.",
+            });
+        }
+
         return CreatedAtAction(nameof(GetDashboard), ToTradeDto(asset, trade, ledger.RealizedByTrade));
     }
 
