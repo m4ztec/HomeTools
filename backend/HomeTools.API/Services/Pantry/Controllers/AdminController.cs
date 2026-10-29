@@ -14,7 +14,7 @@ namespace HomeTools.API.Services.Pantry.Controllers;
 [Route("api/admin")]
 public sealed class AdminController(
     HomeToolsDbContext db,
-    UserManager<PantryUser> users) : ControllerBase
+    UserManager<HomeToolsUser> users) : ControllerBase
 {
     [HttpGet("users")]
     public async Task<ActionResult<IReadOnlyList<AdminUserDto>>> GetUsers()

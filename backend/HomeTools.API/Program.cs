@@ -22,7 +22,7 @@ if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32
 builder.Services.AddDbContext<HomeToolsDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services
-    .AddIdentityCore<PantryUser>(options =>
+    .AddIdentityCore<HomeToolsUser>(options =>
     {
         options.User.RequireUniqueEmail = true;
         options.Password.RequiredLength = 6;

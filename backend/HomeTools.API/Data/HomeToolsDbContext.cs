@@ -12,7 +12,7 @@ using HomeTools.API.Services.TradeTracker.Models;
 namespace HomeTools.API.Data;
 
 public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> options)
-    : IdentityDbContext<PantryUser, IdentityRole<Guid>, Guid>(options)
+    : IdentityDbContext<HomeToolsUser, IdentityRole<Guid>, Guid>(options)
 {
     private static readonly ValueConverter<DateTimeOffset, long> DateTimeOffsetConverter = new(
         value => value.UtcDateTime.Ticks,
@@ -46,7 +46,7 @@ public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> opti
             }
         }
 
-        builder.Entity<PantryUser>(entity =>
+        builder.Entity<HomeToolsUser>(entity =>
         {
             entity.ToTable("users");
             entity.Property(user => user.DisplayName).HasMaxLength(60).IsRequired();

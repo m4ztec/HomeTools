@@ -13,8 +13,8 @@ namespace HomeTools.API.Services.Authentication.Controllers;
 [Route("api/auth")]
 public sealed class AuthController(
     HomeToolsDbContext db,
-    UserManager<PantryUser> users,
-    SignInManager<PantryUser> signInManager,
+    UserManager<HomeToolsUser> users,
+    SignInManager<HomeToolsUser> signInManager,
     TokenService tokens) : ControllerBase
 {
     [HttpPost("register")]
@@ -34,7 +34,7 @@ public sealed class AuthController(
             return StatusCode(StatusCodes.Status403Forbidden, new { message = "Sign-ups are currently closed." });
         }
 
-        var user = new PantryUser
+        var user = new HomeToolsUser
         {
             Id = Guid.NewGuid(),
             UserName = email,
@@ -110,9 +110,9 @@ public sealed class AuthController(
         return Ok(await ToUserDtoAsync(user));
     }
 
-    private async Task<AuthResponse> CreateResponseAsync(PantryUser user) =>
+    private async Task<AuthResponse> CreateResponseAsync(HomeToolsUser user) =>
         new(await tokens.CreateAsync(user), await ToUserDtoAsync(user));
 
-    private async Task<AuthUserDto> ToUserDtoAsync(PantryUser user) =>
+    private async Task<AuthUserDto> ToUserDtoAsync(HomeToolsUser user) =>
         new(user.Id, user.Email ?? "", user.DisplayName, await users.IsInRoleAsync(user, "admin"));
 }

@@ -6,9 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HomeTools.API.Services.Authentication;
 
-public sealed class TokenService(IConfiguration configuration, UserManager<PantryUser> userManager)
+public sealed class TokenService(IConfiguration configuration, UserManager<HomeToolsUser> userManager)
 {
-    public async Task<string> CreateAsync(PantryUser user)
+    public async Task<string> CreateAsync(HomeToolsUser user)
     {
         var issuer = configuration["Jwt:Issuer"] ?? "HomeTools.API";
         var audience = configuration["Jwt:Audience"] ?? "Pantry.Web";

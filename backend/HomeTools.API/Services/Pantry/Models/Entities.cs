@@ -20,7 +20,7 @@ public sealed class HomeMember
     public string Role { get; set; } = "member";
     public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
     public Home Home { get; set; } = null!;
-    public PantryUser User { get; set; } = null!;
+    public HomeToolsUser User { get; set; } = null!;
 }
 
 public sealed class Item
