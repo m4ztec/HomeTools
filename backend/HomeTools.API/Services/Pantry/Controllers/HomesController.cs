@@ -1,8 +1,11 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using HomeTools.API.Services.Authentication;
 using HomeTools.API.Services.Pantry.Contracts;
 using HomeTools.API.Data;
 using HomeTools.API.Services.Pantry.Models;
@@ -12,8 +15,12 @@ namespace HomeTools.API.Services.Pantry.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/homes")]
-public sealed class HomesController(HomeToolsDbContext db) : ControllerBase
+public sealed class HomesController(
+    HomeToolsDbContext db,
+    UserManager<HomeToolsUser> users) : ControllerBase
 {
+    private static readonly TimeSpan InvitationLifetime = TimeSpan.FromDays(7);
+
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<HomeDto>>> GetHomes()
     {
@@ -38,7 +45,6 @@ public sealed class HomesController(HomeToolsDbContext db) : ControllerBase
         var home = new Home
         {
             Name = name,
-            InviteCode = await NewInviteCodeAsync(),
             CreatedBy = CurrentUserId(),
         };
         home.Members.Add(new HomeMember { Home = home, UserId = home.CreatedBy, Role = "owner" });
@@ -47,21 +53,124 @@ public sealed class HomesController(HomeToolsDbContext db) : ControllerBase
         return Ok(ToDto(home));
     }
 
-    [HttpPost("join")]
-    public async Task<ActionResult<Guid>> JoinHome(JoinHomeRequest request)
+    [HttpPost("{homeId:guid}/invitations")]
+    public async Task<ActionResult<CreatedHomeInvitationDto>> CreateInvitation(
+        Guid homeId,
+        CreateHomeInvitationRequest request)
     {
-        var code = request.Code.Trim().ToUpperInvariant();
-        var home = await db.Homes.SingleOrDefaultAsync(value => value.InviteCode == code);
-        if (home is null) return NotFound(new { message = "Invalid invite code." });
-
         var userId = CurrentUserId();
-        if (!await db.HomeMembers.AnyAsync(member => member.HomeId == home.Id && member.UserId == userId))
+        var isOwner = await db.HomeMembers.AnyAsync(member =>
+            member.HomeId == homeId && member.UserId == userId && member.Role == "owner");
+        if (!isOwner) return NotFound();
+
+        var email = request.Email.Trim();
+        var invitedUser = await users.FindByEmailAsync(email);
+        if (invitedUser is null)
         {
-            db.HomeMembers.Add(new HomeMember { HomeId = home.Id, UserId = userId, Role = "member" });
+            return NotFound(new { message = "No Pantry account exists for that email address." });
+        }
+
+        var alreadyMember = await db.HomeMembers.AnyAsync(member =>
+            member.HomeId == homeId && member.UserId == invitedUser.Id);
+        if (alreadyMember)
+        {
+            return Conflict(new { message = "That account is already a member of this home." });
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var token = NewInvitationToken();
+        var invitation = new HomeInvitation
+        {
+            HomeId = homeId,
+            InvitedUserId = invitedUser.Id,
+            CreatedByUserId = userId,
+            TokenHash = HashInvitationToken(token),
+            CreatedAt = now,
+            ExpiresAt = now.Add(InvitationLifetime),
+        };
+
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        await db.HomeInvitations
+            .Where(value =>
+                value.HomeId == homeId &&
+                value.InvitedUserId == invitedUser.Id &&
+                value.AcceptedAt == null &&
+                value.RevokedAt == null &&
+                value.ExpiresAt > now)
+            .ExecuteUpdateAsync(update => update.SetProperty(value => value.RevokedAt, now));
+        db.HomeInvitations.Add(invitation);
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return Ok(new CreatedHomeInvitationDto(
+            invitation.Id,
+            invitedUser.Email ?? email,
+            token,
+            invitation.ExpiresAt));
+    }
+
+    [HttpPost("invitations/preview")]
+    public async Task<ActionResult<HomeInvitationPreviewDto>> PreviewInvitation(
+        HomeInvitationTokenRequest request)
+    {
+        var invitation = await FindActiveInvitationAsync(request.Token, CurrentUserId());
+        if (invitation is null) return NotFound(new { message = "This invitation is invalid or unavailable." });
+
+        return Ok(new HomeInvitationPreviewDto(
+            invitation.HomeId,
+            invitation.Home.Name,
+            invitation.InvitedUser.Email ?? "",
+            invitation.ExpiresAt));
+    }
+
+    [HttpPost("invitations/accept")]
+    public async Task<ActionResult<Guid>> AcceptInvitation(HomeInvitationTokenRequest request)
+    {
+        var userId = CurrentUserId();
+        var tokenHash = HashInvitationToken(request.Token);
+        var now = DateTimeOffset.UtcNow;
+
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        var invitation = await db.HomeInvitations
+            .Where(value =>
+                value.TokenHash == tokenHash &&
+                value.InvitedUserId == userId &&
+                value.AcceptedAt == null &&
+                value.RevokedAt == null &&
+                value.ExpiresAt > now)
+            .Select(value => new { value.Id, value.HomeId })
+            .SingleOrDefaultAsync();
+        if (invitation is null)
+        {
+            return NotFound(new { message = "This invitation is invalid or unavailable." });
+        }
+
+        var claimed = await db.HomeInvitations
+            .Where(value =>
+                value.Id == invitation.Id &&
+                value.AcceptedAt == null &&
+                value.RevokedAt == null &&
+                value.ExpiresAt > now)
+            .ExecuteUpdateAsync(update => update.SetProperty(value => value.AcceptedAt, now));
+        if (claimed != 1)
+        {
+            return NotFound(new { message = "This invitation is invalid or unavailable." });
+        }
+
+        if (!await db.HomeMembers.AnyAsync(member =>
+                member.HomeId == invitation.HomeId && member.UserId == userId))
+        {
+            db.HomeMembers.Add(new HomeMember
+            {
+                HomeId = invitation.HomeId,
+                UserId = userId,
+                Role = "member",
+            });
             await db.SaveChangesAsync();
         }
 
-        return Ok(home.Id);
+        await transaction.CommitAsync();
+        return Ok(invitation.HomeId);
     }
 
     [HttpGet("{homeId:guid}/members")]
@@ -112,17 +221,30 @@ public sealed class HomesController(HomeToolsDbContext db) : ControllerBase
     private Task<bool> IsMemberAsync(Guid homeId) =>
         db.HomeMembers.AnyAsync(member => member.HomeId == homeId && member.UserId == CurrentUserId());
 
-    private async Task<string> NewInviteCodeAsync()
+    private Task<HomeInvitation?> FindActiveInvitationAsync(string token, Guid userId)
     {
-        const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        while (true)
-        {
-            var bytes = RandomNumberGenerator.GetBytes(8);
-            var code = new string(bytes.Select(value => alphabet[value % alphabet.Length]).ToArray());
-            if (!await db.Homes.AnyAsync(home => home.InviteCode == code)) return code;
-        }
+        var tokenHash = HashInvitationToken(token);
+        var now = DateTimeOffset.UtcNow;
+        return db.HomeInvitations
+            .Include(value => value.Home)
+            .Include(value => value.InvitedUser)
+            .SingleOrDefaultAsync(value =>
+                value.TokenHash == tokenHash &&
+                value.InvitedUserId == userId &&
+                value.AcceptedAt == null &&
+                value.RevokedAt == null &&
+                value.ExpiresAt > now);
     }
 
+    private static string NewInvitationToken() =>
+        Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+            .TrimEnd('=')
+            .Replace('+', '-')
+            .Replace('/', '_');
+
+    private static string HashInvitationToken(string token) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+
     private static HomeDto ToDto(Home home) =>
-        new(home.Id, home.Name, home.InviteCode, home.CreatedBy, home.CreatedAt);
+        new(home.Id, home.Name, home.CreatedBy, home.CreatedAt);
 }

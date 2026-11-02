@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Copy, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import type { Home } from "../model";
-import { useLeaveHome, useMembers } from "../hooks";
+import { useCreateHomeInvitation, useLeaveHome, useMembers } from "../hooks";
 
 const tones = [
   "bg-glow/15 text-glow",
@@ -22,14 +22,35 @@ export function HouseholdPanel({
 }) {
   const { data: members = [] } = useMembers(home.id);
   const leave = useLeaveHome();
-  const [showCode, setShowCode] = useState(false);
+  const createInvitation = useCreateHomeInvitation(home.id);
+  const [showInvite, setShowInvite] = useState(false);
+  const [email, setEmail] = useState("");
+  const [inviteUrl, setInviteUrl] = useState("");
+  const [invitedEmail, setInvitedEmail] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
+  const isOwner = home.created_by === currentUserId;
 
-  async function copyCode() {
+  function createInvite(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    createInvitation.mutate(email.trim(), {
+      onSuccess: (invitation) => {
+        const url = new URL("/join", window.location.origin);
+        url.hash = `invite=${invitation.token}`;
+        setInviteUrl(url.toString());
+        setInvitedEmail(invitation.invited_email);
+        setExpiresAt(invitation.expires_at);
+        setEmail("");
+        toast.success("Invite link created");
+      },
+    });
+  }
+
+  async function copyInviteLink() {
     try {
-      await navigator.clipboard.writeText(home.invite_code);
-      toast.success("Invite code copied");
+      await navigator.clipboard.writeText(inviteUrl);
+      toast.success("Invite link copied");
     } catch {
-      toast.message(`Invite code: ${home.invite_code}`);
+      toast.error("Clipboard access is unavailable. Select and copy the invite link.");
     }
   }
 
@@ -37,31 +58,72 @@ export function HouseholdPanel({
     <section className="glass rounded-3xl p-4 sm:p-5">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold">Household</h2>
-        <button
-          type="button"
-          onClick={() => setShowCode((v) => !v)}
-          className="text-xs font-medium text-glow hover:text-glow/80"
-        >
-          Share
-        </button>
+        {isOwner && (
+          <button
+            type="button"
+            onClick={() => setShowInvite((value) => !value)}
+            aria-expanded={showInvite}
+            className="text-xs font-medium text-glow hover:text-glow/80"
+          >
+            Invite
+          </button>
+        )}
       </div>
 
-      {showCode && (
+      {showInvite && isOwner && (
         <div className="mt-3 rounded-xl bg-ink-2/60 p-3 ring-1 ring-glass-line">
-          <p className="text-xs text-mist">Anyone with this code can join {home.name}:</p>
-          <div className="mt-2 flex items-center gap-2">
-            <code className="flex-1 font-display text-lg font-semibold tracking-[0.2em]">
-              {home.invite_code}
-            </code>
+          <p className="text-xs leading-5 text-mist">
+            Invite an existing Pantry account by email. Links are single-use, expire in 7 days, and
+            only work for that account. Email delivery is not configured, so copy and send the link
+            yourself.
+          </p>
+          <form onSubmit={createInvite} className="mt-3">
+            <label htmlFor={`invite-email-${home.id}`} className="sr-only">
+              Account email
+            </label>
+            <input
+              id={`invite-email-${home.id}`}
+              className="field"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="name@example.com"
+              maxLength={256}
+              required
+            />
             <button
-              type="button"
-              onClick={copyCode}
-              className="qty-btn"
-              aria-label="Copy invite code"
+              type="submit"
+              className="btn-glow mt-2 w-full"
+              disabled={createInvitation.isPending || !email.trim()}
             >
-              <Copy className="size-3.5" />
+              {createInvitation.isPending ? "Creating link…" : "Create invite link"}
             </button>
-          </div>
+          </form>
+          {inviteUrl && (
+            <div className="mt-3 border-t border-foreground/10 pt-3">
+              <p className="text-xs font-medium">{invitedEmail}</p>
+              <p className="mt-1 text-xs text-mist">
+                Expires {new Date(expiresAt).toLocaleDateString()}
+              </p>
+              <input
+                className="field mt-2"
+                aria-label="Invite link"
+                readOnly
+                value={inviteUrl}
+                onFocus={(event) => event.currentTarget.select()}
+              />
+              <button
+                type="button"
+                onClick={() => void copyInviteLink()}
+                className="btn-ghost mt-2 flex w-full items-center justify-center gap-2"
+              >
+                <Copy className="size-4" /> Copy invite link
+              </button>
+              <p className="mt-2 text-xs text-mist">
+                Creating another invite for this account will invalidate this link.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

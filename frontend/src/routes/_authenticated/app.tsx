@@ -105,7 +105,7 @@ function AppPage() {
                 Welcome{user.displayName ? `, ${user.displayName}` : ""}
               </h2>
               <p className="text-sm text-mist">
-                Start by creating your first home, or join one someone shared with you.
+                Create a home, or open a one-time invitation link from a home owner to join one.
               </p>
             </div>
             <HomeSetup onDone={(id) => setSelected(id)} />

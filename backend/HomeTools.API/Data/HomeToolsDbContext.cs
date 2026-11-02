@@ -26,6 +26,7 @@ public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> opti
         value => value!.ToArray());
 
     public DbSet<Home> Homes => Set<Home>();
+    public DbSet<HomeInvitation> HomeInvitations => Set<HomeInvitation>();
     public DbSet<HomeMember> HomeMembers => Set<HomeMember>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
@@ -63,10 +64,24 @@ public sealed class HomeToolsDbContext(DbContextOptions<HomeToolsDbContext> opti
             entity.ToTable("homes");
             entity.HasKey(home => home.Id);
             entity.Property(home => home.Name).HasMaxLength(120).IsRequired();
-            entity.Property(home => home.InviteCode).HasMaxLength(8).IsRequired();
-            entity.HasIndex(home => home.InviteCode).IsUnique();
             entity.HasMany(home => home.Members).WithOne(member => member.Home).HasForeignKey(member => member.HomeId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(home => home.Items).WithOne(item => item.Home).HasForeignKey(item => item.HomeId).OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<HomeInvitation>(entity =>
+        {
+            entity.ToTable("home_invitations");
+            entity.HasKey(invitation => invitation.Id);
+            entity.Property(invitation => invitation.TokenHash).HasMaxLength(64).IsRequired();
+            entity.HasIndex(invitation => invitation.TokenHash).IsUnique();
+            entity.HasIndex(invitation => new { invitation.HomeId, invitation.InvitedUserId });
+            entity.HasOne(invitation => invitation.Home)
+                .WithMany(home => home.Invitations)
+                .HasForeignKey(invitation => invitation.HomeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(invitation => invitation.InvitedUser)
+                .WithMany()
+                .HasForeignKey(invitation => invitation.InvitedUserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         builder.Entity<HomeMember>(entity =>
         {

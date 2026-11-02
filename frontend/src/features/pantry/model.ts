@@ -18,9 +18,22 @@ export type Item = {
 export type Home = {
   id: string;
   name: string;
-  invite_code: string;
   created_by: string;
   created_at: string;
+};
+
+export type CreatedHomeInvitation = {
+  id: string;
+  invited_email: string;
+  token: string;
+  expires_at: string;
+};
+
+export type HomeInvitationPreview = {
+  home_id: string;
+  home_name: string;
+  invited_email: string;
+  expires_at: string;
 };
 
 export type AppSettings = {

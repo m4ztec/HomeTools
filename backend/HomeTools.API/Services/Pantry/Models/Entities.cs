@@ -6,11 +6,26 @@ public sealed class Home
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "";
-    public string InviteCode { get; set; } = "";
     public Guid CreatedBy { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public List<HomeMember> Members { get; set; } = [];
     public List<Item> Items { get; set; } = [];
+    public List<HomeInvitation> Invitations { get; set; } = [];
+}
+
+public sealed class HomeInvitation
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid HomeId { get; set; }
+    public Guid InvitedUserId { get; set; }
+    public Guid CreatedByUserId { get; set; }
+    public string TokenHash { get; set; } = "";
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset ExpiresAt { get; set; }
+    public DateTimeOffset? AcceptedAt { get; set; }
+    public DateTimeOffset? RevokedAt { get; set; }
+    public Home Home { get; set; } = null!;
+    public HomeToolsUser InvitedUser { get; set; } = null!;
 }
 
 public sealed class HomeMember

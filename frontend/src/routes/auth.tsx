@@ -1,15 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/features/auth/useSession";
 import { authApi } from "@/features/auth/api";
 import { setAccessToken } from "@/shared/lib/api-client";
 
-type Search = { mode?: "signin" | "signup" };
+type Search = { mode?: "signin" | "signup"; returnTo?: string };
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     mode: s["mode"] === "signup" ? "signup" : "signin",
+    ...(typeof s["returnTo"] === "string" ? { returnTo: s["returnTo"] } : {}),
   }),
   head: () => ({
     meta: [
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { mode } = Route.useSearch();
+  const { mode, returnTo } = Route.useSearch();
   const navigate = useNavigate();
   const { user, loading } = useSession();
   const [email, setEmail] = useState("");
@@ -40,9 +41,18 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const isSignup = mode === "signup";
 
+  const continueAfterAuth = useCallback(() => {
+    const destination = invitationReturnPath(returnTo);
+    if (destination) {
+      window.location.assign(destination);
+      return;
+    }
+    navigate({ to: "/homes", replace: true });
+  }, [navigate, returnTo]);
+
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/homes", replace: true });
-  }, [user, loading, navigate]);
+    if (!loading && user) continueAfterAuth();
+  }, [user, loading, continueAfterAuth]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -51,11 +61,11 @@ function AuthPage() {
       if (isSignup) {
         const response = await authApi.register(email, password, name.trim());
         setAccessToken(response.accessToken);
-        navigate({ to: "/homes", replace: true });
+        continueAfterAuth();
       } else {
         const response = await authApi.login(email, password);
         setAccessToken(response.accessToken);
-        navigate({ to: "/homes", replace: true });
+        continueAfterAuth();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
@@ -86,8 +96,8 @@ function AuthPage() {
               </h1>
               <p className="mt-1 text-sm text-mist">
                 {isSignup
-                  ? "Then create a home or join one with an invite code."
-                  : "Sign in to see your homes."}
+                  ? "Create your account and set up a home. To join an existing home, sign in with the account it invited."
+                  : "Sign in to see your homes or accept an invitation."}
               </p>
             </div>
             {isSignup && (
@@ -143,7 +153,10 @@ function AuthPage() {
               {isSignup ? "Already have an account? " : "New here? "}
               <Link
                 to="/auth"
-                search={{ mode: isSignup ? "signin" : "signup" }}
+                search={{
+                  mode: isSignup ? "signin" : "signup",
+                  ...(returnTo ? { returnTo } : {}),
+                }}
                 className="font-medium text-glow"
               >
                 {isSignup ? "Sign in" : "Create one"}
@@ -154,4 +167,14 @@ function AuthPage() {
       </div>
     </div>
   );
+}
+
+function invitationReturnPath(value: string | undefined) {
+  if (!value?.startsWith("/join#invite=")) return null;
+  const destination = new URL(value, window.location.origin);
+  if (destination.origin !== window.location.origin || destination.pathname !== "/join")
+    return null;
+  const token = new URLSearchParams(destination.hash.slice(1)).get("invite");
+  if (!token || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
+  return `${destination.pathname}${destination.hash}`;
 }

@@ -7,7 +7,13 @@ import { applySettings } from "@/features/pantry/model";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    if (!getAccessToken()) throw redirect({ to: "/auth" });
+    const invitationReturnTo =
+      typeof window !== "undefined" &&
+      window.location.pathname === "/join" &&
+      window.location.hash.startsWith("#invite=")
+        ? `${window.location.pathname}${window.location.hash}`
+        : null;
+    if (!getAccessToken()) throw authRedirect(invitationReturnTo);
     try {
       const user = await authApi.me();
       const settings = await pantryApi.settings();
@@ -15,10 +21,16 @@ export const Route = createFileRoute("/_authenticated")({
       return { user, isAdmin: user.isAdmin };
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
-        throw redirect({ to: "/auth" });
+        throw authRedirect(invitationReturnTo);
       }
       throw error;
     }
   },
   component: () => <Outlet />,
 });
+
+function authRedirect(returnTo: string | null) {
+  return returnTo
+    ? redirect({ to: "/auth", search: { mode: "signin", returnTo } })
+    : redirect({ to: "/auth" });
+}

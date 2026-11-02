@@ -16,6 +16,8 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedHomesRouteImport } from './routes/_authenticated/homes'
 import { Route as AuthenticatedIrsRouteImport } from './routes/_authenticated/irs'
+import { Route as AuthenticatedJoinRouteImport } from './routes/_authenticated/join'
+import { Route as AuthenticatedPantryRouteImport } from './routes/_authenticated/pantry'
 import { Route as AuthenticatedTradeTrackerRouteImport } from './routes/_authenticated/trade-tracker'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +54,16 @@ const AuthenticatedIrsRoute = AuthenticatedIrsRouteImport.update({
   path: '/irs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedJoinRoute = AuthenticatedJoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPantryRoute = AuthenticatedPantryRouteImport.update({
+  id: '/pantry',
+  path: '/pantry',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTradeTrackerRoute =
   AuthenticatedTradeTrackerRouteImport.update({
     id: '/trade-tracker',
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/homes': typeof AuthenticatedHomesRoute
   '/irs': typeof AuthenticatedIrsRoute
+  '/join': typeof AuthenticatedJoinRoute
+  '/pantry': typeof AuthenticatedPantryRoute
   '/trade-tracker': typeof AuthenticatedTradeTrackerRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +89,8 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppRoute
   '/homes': typeof AuthenticatedHomesRoute
   '/irs': typeof AuthenticatedIrsRoute
+  '/join': typeof AuthenticatedJoinRoute
+  '/pantry': typeof AuthenticatedPantryRoute
   '/trade-tracker': typeof AuthenticatedTradeTrackerRoute
 }
 export interface FileRoutesById {
@@ -86,14 +102,33 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/homes': typeof AuthenticatedHomesRoute
   '/_authenticated/irs': typeof AuthenticatedIrsRoute
+  '/_authenticated/join': typeof AuthenticatedJoinRoute
+  '/_authenticated/pantry': typeof AuthenticatedPantryRoute
   '/_authenticated/trade-tracker': typeof AuthenticatedTradeTrackerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/app'
+    | '/homes'
+    | '/irs'
+    | '/join'
+    | '/pantry'
+    | '/trade-tracker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/app' | '/homes' | '/irs' | '/trade-tracker'
+  to:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/app'
+    | '/homes'
+    | '/irs'
+    | '/join'
+    | '/pantry'
+    | '/trade-tracker'
   id:
     | '__root__'
     | '/'
@@ -103,6 +138,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/homes'
     | '/_authenticated/irs'
+    | '/_authenticated/join'
+    | '/_authenticated/pantry'
     | '/_authenticated/trade-tracker'
   fileRoutesById: FileRoutesById
 }
@@ -163,6 +200,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIrsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/join': {
+      id: '/_authenticated/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof AuthenticatedJoinRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pantry': {
+      id: '/_authenticated/pantry'
+      path: '/pantry'
+      fullPath: '/pantry'
+      preLoaderRoute: typeof AuthenticatedPantryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/trade-tracker': {
       id: '/_authenticated/trade-tracker'
       path: '/trade-tracker'
@@ -178,6 +229,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedHomesRoute: typeof AuthenticatedHomesRoute
   AuthenticatedIrsRoute: typeof AuthenticatedIrsRoute
+  AuthenticatedJoinRoute: typeof AuthenticatedJoinRoute
+  AuthenticatedPantryRoute: typeof AuthenticatedPantryRoute
   AuthenticatedTradeTrackerRoute: typeof AuthenticatedTradeTrackerRoute
 }
 
@@ -186,6 +239,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedHomesRoute: AuthenticatedHomesRoute,
   AuthenticatedIrsRoute: AuthenticatedIrsRoute,
+  AuthenticatedJoinRoute: AuthenticatedJoinRoute,
+  AuthenticatedPantryRoute: AuthenticatedPantryRoute,
   AuthenticatedTradeTrackerRoute: AuthenticatedTradeTrackerRoute,
 }
 

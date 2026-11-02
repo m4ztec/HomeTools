@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { pantryApi } from "./api";
-import type { Item, ItemInput } from "./model";
+import type { HomeInvitationPreview, Item, ItemInput } from "./model";
 
 export function useHomes() {
   return useQuery({
@@ -49,11 +49,27 @@ export function useCreateHome() {
   });
 }
 
-export function useJoinHome() {
+export function useCreateHomeInvitation(homeId: string) {
+  return useMutation({
+    mutationFn: (email: string) => pantryApi.createHomeInvitation(homeId, email),
+    onError: (error) => toast.error(error.message),
+  });
+}
+
+export function useHomeInvitation(token: string | null) {
+  return useQuery<HomeInvitationPreview>({
+    queryKey: ["home-invitation", token],
+    enabled: !!token,
+    queryFn: () => pantryApi.previewHomeInvitation(token!),
+    retry: false,
+  });
+}
+
+export function useAcceptHomeInvitation() {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: pantryApi.joinHome,
-    onSuccess: () => invalidate(["homes", "members"]),
+    mutationFn: pantryApi.acceptHomeInvitation,
+    onSuccess: () => invalidate(["homes", "members", "items"]),
     onError: (error) => toast.error(error.message),
   });
 }

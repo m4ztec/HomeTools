@@ -1,5 +1,12 @@
 import { apiRequest } from "@/shared/lib/api-client";
-import type { AppSettings, Home, Item, ItemInput } from "./model";
+import type {
+  AppSettings,
+  CreatedHomeInvitation,
+  Home,
+  HomeInvitationPreview,
+  Item,
+  ItemInput,
+} from "./model";
 
 export type Member = { user_id: string; role: string; display_name: string };
 export type AdminUser = {
@@ -23,8 +30,21 @@ export const pantryApi = {
   homes: () => apiRequest<Home[]>("/homes"),
   createHome: (name: string) =>
     apiRequest<Home>("/homes", { method: "POST", body: JSON.stringify({ name }) }),
-  joinHome: (code: string) =>
-    apiRequest<string>("/homes/join", { method: "POST", body: JSON.stringify({ code }) }),
+  createHomeInvitation: (homeId: string, email: string) =>
+    apiRequest<CreatedHomeInvitation>(`/homes/${homeId}/invitations`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  previewHomeInvitation: (token: string) =>
+    apiRequest<HomeInvitationPreview>("/homes/invitations/preview", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+  acceptHomeInvitation: (token: string) =>
+    apiRequest<string>("/homes/invitations/accept", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
   members: (homeId: string) => apiRequest<Member[]>(`/homes/${homeId}/members`),
   leaveHome: (homeId: string) =>
     apiRequest<void>(`/homes/${homeId}/membership`, { method: "DELETE" }),

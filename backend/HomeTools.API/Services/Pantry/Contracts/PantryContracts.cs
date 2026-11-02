@@ -1,17 +1,30 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 using HomeTools.API.Services.Pantry.Models;
 
 namespace HomeTools.API.Services.Pantry.Contracts;
 
 public sealed record CreateHomeRequest(string Name);
-public sealed record JoinHomeRequest(string Code);
+public sealed record CreateHomeInvitationRequest(
+    [param: Required, EmailAddress, StringLength(256)] string Email);
+public sealed record HomeInvitationTokenRequest(
+    [param: Required, StringLength(64, MinimumLength = 40)] string Token);
 public sealed record HomeDto(
     Guid Id,
     string Name,
-    [property: JsonPropertyName("invite_code")] string InviteCode,
     [property: JsonPropertyName("created_by")] Guid CreatedBy,
     [property: JsonPropertyName("created_at")] DateTimeOffset CreatedAt);
+public sealed record CreatedHomeInvitationDto(
+    Guid Id,
+    [property: JsonPropertyName("invited_email")] string InvitedEmail,
+    string Token,
+    [property: JsonPropertyName("expires_at")] DateTimeOffset ExpiresAt);
+public sealed record HomeInvitationPreviewDto(
+    [property: JsonPropertyName("home_id")] Guid HomeId,
+    [property: JsonPropertyName("home_name")] string HomeName,
+    [property: JsonPropertyName("invited_email")] string InvitedEmail,
+    [property: JsonPropertyName("expires_at")] DateTimeOffset ExpiresAt);
 public sealed record MemberDto(
     [property: JsonPropertyName("user_id")] Guid UserId,
     string Role,

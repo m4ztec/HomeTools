@@ -35,10 +35,10 @@ export function AppNavbar({ user, isAdmin, active, actions }: AppNavbarProps) {
 
   return (
     <>
-      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-b border-glass-line pb-4">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 border-b border-glass-line pb-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-x-6">
         <Link
           to="/homes"
-          className="group flex items-center gap-3"
+          className="group col-start-1 row-start-1 flex min-w-0 items-center gap-3"
           aria-label="HomeTools dashboard"
         >
           <div className="glass grid size-10 place-items-center rounded-xl font-display text-lg font-semibold text-glow transition-colors group-hover:ring-1 group-hover:ring-glow/40">
@@ -52,7 +52,7 @@ export function AppNavbar({ user, isAdmin, active, actions }: AppNavbarProps) {
 
         <nav
           aria-label="Main navigation"
-          className="order-3 flex w-full items-center gap-1 overflow-x-auto md:order-none md:w-auto"
+          className="col-span-2 row-start-2 flex min-w-0 w-full items-center gap-1 overflow-x-auto lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:w-auto"
         >
           <Link
             to="/homes"
@@ -63,8 +63,7 @@ export function AppNavbar({ user, isAdmin, active, actions }: AppNavbarProps) {
             Services
           </Link>
           <Link
-            to="/homes"
-            hash="pantry"
+            to="/pantry"
             aria-current={active === "pantry" ? "page" : undefined}
             className={`whitespace-nowrap rounded-full px-3 py-2 text-sm transition-colors hover:bg-white/5 hover:text-foreground ${active === "pantry" ? "bg-white/5 text-foreground" : "text-mist"}`}
           >
@@ -86,7 +85,7 @@ export function AppNavbar({ user, isAdmin, active, actions }: AppNavbarProps) {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="col-start-2 row-start-1 flex items-center justify-self-end gap-2 lg:col-start-3">
           {actions}
           {isAdmin && (
             <Link
