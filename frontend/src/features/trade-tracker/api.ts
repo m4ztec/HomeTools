@@ -16,6 +16,13 @@ export type TradeInput = {
   notes: string;
 };
 
+export type ImportTradeInput = Omit<TradeInput, "assetId" | "notes"> & {
+  symbol: string;
+  name: string | null;
+  currency: string;
+  notes: string | null;
+};
+
 export type Trade = {
   id: string;
   assetId: string;
@@ -51,6 +58,11 @@ export type TradeDashboard = {
   trades: Trade[];
 };
 
+export type ImportTradesResult = {
+  importedTrades: number;
+  createdAssets: number;
+};
+
 export const tradeTrackerApi = {
   dashboard: () => apiRequest<TradeDashboard>("/trades"),
   createAsset: (asset: AssetInput) =>
@@ -62,6 +74,11 @@ export const tradeTrackerApi = {
     apiRequest<Trade>("/trades", {
       method: "POST",
       body: JSON.stringify(trade),
+    }),
+  importTrades: (trades: ImportTradeInput[]) =>
+    apiRequest<ImportTradesResult>("/trades/import", {
+      method: "POST",
+      body: JSON.stringify({ trades }),
     }),
   updatePrice: (assetId: string, currentPrice: number) =>
     apiRequest<TrackedAsset>(`/trades/assets/${assetId}/price`, {

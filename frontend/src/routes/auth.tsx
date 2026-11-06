@@ -35,7 +35,9 @@ function AuthPage() {
   const { mode, returnTo } = Route.useSearch();
   const navigate = useNavigate();
   const { user, loading } = useSession();
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -59,11 +61,11 @@ function AuthPage() {
     setBusy(true);
     try {
       if (isSignup) {
-        const response = await authApi.register(email, password, name.trim());
+        const response = await authApi.register(email, username.trim(), password, name.trim());
         setAccessToken(response.accessToken);
         continueAfterAuth();
       } else {
-        const response = await authApi.login(email, password);
+        const response = await authApi.login(identifier.trim(), password);
         setAccessToken(response.accessToken);
         continueAfterAuth();
       }
@@ -115,19 +117,44 @@ function AuthPage() {
                 />
               </div>
             )}
+            {isSignup && (
+              <div>
+                <label className="text-xs text-mist" htmlFor="username">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  className="field mt-1"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="e.g. manuel"
+                  minLength={3}
+                  maxLength={30}
+                  pattern="[A-Za-z0-9](?:[A-Za-z0-9._-]{1,28}[A-Za-z0-9])?"
+                  title="Use 3–30 letters, numbers, periods, underscores, or hyphens. Start and end with a letter or number."
+                  required
+                  autoComplete="username"
+                />
+                <p className="mt-1 text-xs text-mist">
+                  Unique; use 3–30 letters, numbers, periods, underscores, or hyphens.
+                </p>
+              </div>
+            )}
             <div>
-              <label className="text-xs text-mist" htmlFor="email">
-                Email
+              <label className="text-xs text-mist" htmlFor={isSignup ? "email" : "identifier"}>
+                {isSignup ? "Email" : "Email or username"}
               </label>
               <input
-                id="email"
-                type="email"
+                id={isSignup ? "email" : "identifier"}
+                type={isSignup ? "email" : "text"}
                 className="field mt-1"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                value={isSignup ? email : identifier}
+                onChange={(e) =>
+                  isSignup ? setEmail(e.target.value) : setIdentifier(e.target.value)
+                }
+                placeholder={isSignup ? "you@example.com" : "you@example.com or username"}
                 required
-                autoComplete="email"
+                autoComplete={isSignup ? "email" : "username"}
               />
             </div>
             <div>

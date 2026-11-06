@@ -8,12 +8,14 @@ import {
   SlidersHorizontal,
   Trash2,
   TrendingUp,
+  Upload,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import type { AuthUser } from "@/features/auth/api";
 import { tradeTrackerApi, type Trade, type TrackedAsset } from "./api";
 import { AddAssetDialog } from "./AddAssetDialog";
+import { ImportTradesDialog } from "./ImportTradesDialog";
 import { AppNavbar } from "@/shared/ui/AppNavbar";
 
 const numberFormat = new Intl.NumberFormat(undefined, { maximumFractionDigits: 8 });
@@ -44,6 +46,7 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
   const tradeFormRef = useRef<HTMLFormElement>(null);
   const [selectedAssetId, setSelectedAssetId] = useState("");
   const [assetDialogOpen, setAssetDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [recordNow, setRecordNow] = useState(true);
   const [assetQuery, setAssetQuery] = useState("");
   const [assetSuggestionsOpen, setAssetSuggestionsOpen] = useState(false);
@@ -247,6 +250,7 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
             }}
           />
         )}
+        {importDialogOpen && <ImportTradesDialog onClose={() => setImportDialogOpen(false)} />}
 
         <section className="mt-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -469,6 +473,14 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
               <span className="text-xs text-mist">
                 {filteredTrades.length} of {trades.length} total
               </span>
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-full bg-glow/10 px-3 py-2 text-xs font-medium text-mist transition-colors hover:bg-glow/20"
+                onClick={() => setImportDialogOpen(true)}
+              >
+                <Upload className="size-4" />
+                Import CSV
+              </button>
               <div className="relative" ref={filtersRef}>
                 <button
                   type="button"

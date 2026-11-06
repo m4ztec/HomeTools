@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "compounds": [
     {
-      "name": "Run Pantry (full stack)",
+      "name": "Run full stack",
       "configurations": ["HomeTools API", "Pantry frontend"],
       "stopAll": true
     }

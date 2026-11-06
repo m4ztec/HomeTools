@@ -7,10 +7,12 @@ import { authApi } from "./api";
 export function ProfileDialog({
   displayName,
   email,
+  username,
   onClose,
 }: {
   displayName: string;
   email: string;
+  username: string;
   onClose: () => void;
 }) {
   const qc = useQueryClient();
@@ -52,6 +54,7 @@ export function ProfileDialog({
       >
         <h2 className="text-lg font-semibold">Your profile</h2>
         <p className="text-xs text-mist">{email}</p>
+        <p className="text-xs text-mist">Username: {username}</p>
         <label className="block space-y-1">
           <span className="text-xs text-mist">Display name</span>
           <input

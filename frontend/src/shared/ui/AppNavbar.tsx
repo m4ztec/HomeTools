@@ -142,6 +142,7 @@ export function AppNavbar({ user, isAdmin, active, actions }: AppNavbarProps) {
         <ProfileDialog
           displayName={user.displayName}
           email={user.email}
+          username={user.username}
           onClose={() => setShowProfile(false)}
         />
       )}

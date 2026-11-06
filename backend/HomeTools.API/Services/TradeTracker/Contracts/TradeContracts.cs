@@ -11,6 +11,21 @@ public sealed record CreateTradeRequest(
     DateTimeOffset TradedAt,
     string? Notes);
 
+public sealed record ImportTradeRequest(
+    string Symbol,
+    string? Name,
+    string Currency,
+    string Side,
+    decimal Quantity,
+    decimal UnitPrice,
+    decimal Fees,
+    DateTimeOffset TradedAt,
+    string? Notes);
+
+public sealed record ImportTradesRequest(IReadOnlyList<ImportTradeRequest> Trades);
+
+public sealed record ImportTradesResult(int ImportedTrades, int CreatedAssets);
+
 public sealed record UpdateAssetPriceRequest(decimal CurrentPrice);
 
 public sealed record TradeDto(

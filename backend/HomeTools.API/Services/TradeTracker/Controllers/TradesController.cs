@@ -115,6 +115,116 @@ public sealed partial class TradesController(
         return CreatedAtAction(nameof(GetDashboard), ToTradeDto(asset, trade, ledger.RealizedByTrade));
     }
 
+    [HttpPost("import")]
+    public async Task<ActionResult<ImportTradesResult>> Import(ImportTradesRequest request)
+    {
+        if (request.Trades.Count is < 1 or > 1000)
+            return BadRequest(new { message = "Import between 1 and 1,000 trades at a time." });
+
+        var ownerId = CurrentUserId();
+        var assets = await db.TrackedAssets
+            .Include(asset => asset.Trades)
+            .Where(asset => asset.OwnerId == ownerId)
+            .ToListAsync();
+        var assetsBySymbol = assets.ToDictionary(asset => asset.Symbol, StringComparer.OrdinalIgnoreCase);
+        var importedBySymbol = new Dictionary<string, List<Trade>>(StringComparer.OrdinalIgnoreCase);
+        var newAssetsBySymbol = new Dictionary<string, TrackedAsset>(StringComparer.OrdinalIgnoreCase);
+        var now = DateTimeOffset.UtcNow;
+
+        for (var index = 0; index < request.Trades.Count; index++)
+        {
+            var imported = request.Trades[index];
+            var row = index + 2;
+            var symbol = imported.Symbol.Trim().ToUpperInvariant();
+            var assetRequest = new CreateTrackedAssetRequest(symbol, imported.Name, imported.Currency);
+            var assetError = Validate(assetRequest);
+            if (assetError is not null)
+                return BadRequest(new { message = $"Row {row}: {assetError}" });
+
+            var tradeRequest = new CreateTradeRequest(
+                Guid.NewGuid(),
+                imported.Side,
+                imported.Quantity,
+                imported.UnitPrice,
+                imported.Fees,
+                imported.TradedAt,
+                imported.Notes);
+            var tradeError = Validate(tradeRequest);
+            if (tradeError is not null)
+                return BadRequest(new { message = $"Row {row}: {tradeError}" });
+
+            TrackedAsset asset;
+            if (assetsBySymbol.TryGetValue(symbol, out var existingAsset))
+            {
+                asset = existingAsset;
+                if (!string.Equals(asset.Currency, imported.Currency.Trim(), StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { message = $"Row {row}: {symbol} is already tracked in {asset.Currency}." });
+            }
+            else if (newAssetsBySymbol.TryGetValue(symbol, out var newAsset))
+            {
+                asset = newAsset;
+                if (!string.Equals(asset.Currency, imported.Currency.Trim(), StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(new { message = $"Row {row}: {symbol} has conflicting currencies in the CSV." });
+                if (asset.Name == symbol && !string.IsNullOrWhiteSpace(imported.Name))
+                    asset.Name = imported.Name.Trim();
+            }
+            else
+            {
+                asset = new TrackedAsset
+                {
+                    OwnerId = ownerId,
+                    Symbol = symbol,
+                    Name = string.IsNullOrWhiteSpace(imported.Name) ? symbol : imported.Name.Trim(),
+                    Currency = imported.Currency.Trim().ToUpperInvariant(),
+                    UpdatedAt = now,
+                };
+                newAssetsBySymbol.Add(symbol, asset);
+            }
+
+            var trade = new Trade
+            {
+                Asset = asset,
+                AssetId = asset.Id,
+                Side = imported.Side,
+                Quantity = imported.Quantity,
+                UnitPrice = imported.UnitPrice,
+                Fees = imported.Fees,
+                TradedAt = imported.TradedAt,
+                Notes = string.IsNullOrWhiteSpace(imported.Notes) ? null : imported.Notes.Trim(),
+                CreatedAt = now.AddTicks(index),
+            };
+            if (!importedBySymbol.TryGetValue(symbol, out var assetTrades))
+            {
+                assetTrades = [];
+                importedBySymbol.Add(symbol, assetTrades);
+            }
+            assetTrades.Add(trade);
+        }
+
+        foreach (var (symbol, importedTrades) in importedBySymbol)
+        {
+            var asset = assetsBySymbol.GetValueOrDefault(symbol) ?? newAssetsBySymbol[symbol];
+            var ledger = CalculateLedger(asset.Trades.Concat(importedTrades));
+            if (ledger.Error is not null)
+            {
+                return BadRequest(new { message = $"{symbol}: {ledger.Error}" });
+            }
+        }
+
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        db.TrackedAssets.AddRange(newAssetsBySymbol.Values);
+        foreach (var (symbol, importedTrades) in importedBySymbol)
+        {
+            var asset = assetsBySymbol.GetValueOrDefault(symbol) ?? newAssetsBySymbol[symbol];
+            asset.UpdatedAt = now;
+            db.Trades.AddRange(importedTrades);
+        }
+        await db.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return Ok(new ImportTradesResult(request.Trades.Count, newAssetsBySymbol.Count));
+    }
+
     [HttpPut("assets/{id:guid}/price")]
     public async Task<ActionResult<TrackedAssetDto>> UpdatePrice(Guid id, UpdateAssetPriceRequest request)
     {
@@ -175,8 +285,9 @@ public sealed partial class TradesController(
         if (!SymbolPattern().IsMatch(symbol))
             return "Symbol may contain 1–20 letters, numbers, periods, underscores, or hyphens.";
         if (request.Name?.Trim().Length > 80) return "Asset name must be 80 characters or fewer.";
-        if (request.Currency.Trim().Length != 3 || !request.Currency.Trim().All(char.IsAsciiLetter))
-            return "Currency must be a three-letter code, such as EUR or USD.";
+        if (!request.Currency.Trim().Equals("EUR", StringComparison.OrdinalIgnoreCase)
+            && !request.Currency.Trim().Equals("USD", StringComparison.OrdinalIgnoreCase))
+            return "Currency must be EUR or USD.";
         return null;
     }
 

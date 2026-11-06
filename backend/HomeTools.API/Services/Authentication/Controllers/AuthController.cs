@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace HomeTools.API.Services.Authentication.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController(
+public sealed partial class AuthController(
     HomeToolsDbContext db,
     UserManager<HomeToolsUser> users,
     SignInManager<HomeToolsUser> signInManager,
@@ -21,10 +22,18 @@ public sealed class AuthController(
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
     {
         var email = request.Email.Trim();
+        var username = request.Username.Trim();
         var displayName = request.DisplayName.Trim();
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(displayName) || displayName.Length > 60)
         {
             return BadRequest(new { message = "Enter a valid email and a name of at most 60 characters." });
+        }
+        if (!UsernamePattern().IsMatch(username))
+        {
+            return BadRequest(new
+            {
+                message = "Username must be 3–30 characters and use only letters, numbers, periods, underscores, or hyphens.",
+            });
         }
 
         await using var transaction = await db.Database.BeginTransactionAsync();
@@ -37,7 +46,7 @@ public sealed class AuthController(
         var user = new HomeToolsUser
         {
             Id = Guid.NewGuid(),
-            UserName = email,
+            UserName = username,
             Email = email,
             DisplayName = displayName,
         };
@@ -62,10 +71,13 @@ public sealed class AuthController(
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
     {
-        var user = await users.FindByEmailAsync(request.Email.Trim());
+        var identifier = request.Identifier.Trim();
+        var user = identifier.Contains('@')
+            ? await users.FindByEmailAsync(identifier)
+            : await users.FindByNameAsync(identifier);
         if (user is null || !(await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false)).Succeeded)
         {
-            return Unauthorized(new { message = "Email or password is incorrect." });
+            return Unauthorized(new { message = "Username, email, or password is incorrect." });
         }
 
         return Ok(await CreateResponseAsync(user));
@@ -114,5 +126,8 @@ public sealed class AuthController(
         new(await tokens.CreateAsync(user), await ToUserDtoAsync(user));
 
     private async Task<AuthUserDto> ToUserDtoAsync(HomeToolsUser user) =>
-        new(user.Id, user.Email ?? "", user.DisplayName, await users.IsInRoleAsync(user, "admin"));
+        new(user.Id, user.Email ?? "", user.UserName ?? "", user.DisplayName, await users.IsInRoleAsync(user, "admin"));
+
+    [GeneratedRegex("^[A-Za-z0-9](?:[A-Za-z0-9._-]{1,28}[A-Za-z0-9])?$", RegexOptions.CultureInvariant)]
+    private static partial Regex UsernamePattern();
 }

@@ -62,14 +62,10 @@ export function AddAssetDialog({
         </label>
         <label className="block text-sm">
           <span className="text-xs text-mist">Currency</span>
-          <input
-            className="field mt-1 uppercase"
-            name="currency"
-            defaultValue="EUR"
-            maxLength={3}
-            minLength={3}
-            required
-          />
+          <select className="field mt-1" name="currency" defaultValue="EUR" required>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+          </select>
         </label>
         <div className="flex justify-end gap-2 pt-1">
           <button
