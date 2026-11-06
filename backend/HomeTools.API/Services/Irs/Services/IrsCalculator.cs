@@ -38,7 +38,7 @@ public sealed class IrsCalculator
 
     public IrsCalculationResult Calculate(IrsScenarioInput input)
     {
-        var joint = input.FilingStatus == "joint";
+        var joint = input.FilingStatus == IrsFilingStatus.Joint;
         var coefficient = joint ? 2m : 1m;
         var primarySocialSecurity = input.CalculateSocialSecurity
             ? input.EmploymentIncome * 0.11m
@@ -72,9 +72,9 @@ public sealed class IrsCalculator
         {
             var rate = input.YouthTaxReliefYear switch
             {
-                1 => 1m,
-                2 or 3 or 4 => 0.75m,
-                5 or 6 or 7 => 0.5m,
+                IrsYouthTaxReliefYear.Year1 => 1m,
+                IrsYouthTaxReliefYear.Year2 or IrsYouthTaxReliefYear.Year3 or IrsYouthTaxReliefYear.Year4 => 0.75m,
+                IrsYouthTaxReliefYear.Year5 or IrsYouthTaxReliefYear.Year6 or IrsYouthTaxReliefYear.Year7 => 0.5m,
                 _ => 0.25m,
             };
             youthExemption = Math.Min(
@@ -94,10 +94,10 @@ public sealed class IrsCalculator
 
         var taxableIncome = Math.Max(0m, netAggregatedIncome + aggregatedCapitalIncome - youthExemption);
         var taxablePerPerson = taxableIncome / coefficient;
-        var brackets = input.Region == "continente" ? MainlandBrackets : IslandBrackets;
+        var brackets = input.Region == IrsRegion.Continente ? MainlandBrackets : IslandBrackets;
         var progressiveTaxPerPerson = TaxFor(taxablePerPerson, brackets);
         var progressiveTax = progressiveTaxPerPerson * coefficient;
-        var solidarityRate = input.Region == "acores" ? (Middle: 0.0175m, Top: 0.035m) : (Middle: 0.025m, Top: 0.05m);
+        var solidarityRate = input.Region == IrsRegion.Acores ? (Middle: 0.0175m, Top: 0.035m) : (Middle: 0.025m, Top: 0.05m);
         var solidarity = SolidarityTax(taxablePerPerson, solidarityRate.Middle, solidarityRate.Top) * coefficient;
 
         var deductions = CalculateDeductions(input, coefficient, taxablePerPerson);
@@ -131,11 +131,11 @@ public sealed class IrsCalculator
         {
             return "Dependent age and disability counts cannot exceed the total number of dependents.";
         }
-        if (input.FilingStatus != "joint" && input.DisabledTaxpayers > 1)
+        if (input.FilingStatus != IrsFilingStatus.Joint && input.DisabledTaxpayers > 1)
         {
             return "A non-joint return can include at most one disabled taxpayer.";
         }
-        if (input.FilingStatus != "joint"
+        if (input.FilingStatus != IrsFilingStatus.Joint
             && (input.SpouseEmploymentIncome > 0
                 || input.SpouseSocialSecurityContributions > 0
                 || input.SpousePensionIncome > 0
@@ -167,7 +167,7 @@ public sealed class IrsCalculator
         decimal coefficient,
         decimal taxablePerPerson)
     {
-        var general = input.FilingStatus == "singleParent"
+        var general = input.FilingStatus == IrsFilingStatus.SingleParent
             ? Deduction(input.GeneralExpenses, 0.45m, 335m)
             : Deduction(input.GeneralExpenses, 0.35m, 250m) * coefficient;
         var taxDeductions = general
@@ -178,7 +178,7 @@ public sealed class IrsCalculator
             + input.AlimonyPaid * 0.20m
             + Deduction(input.InvoiceVatExpenses, 0.15m, 250m) * coefficient
             + PprDeduction(input.PprContributions, input.Age)
-            + (input.FilingStatus == "joint" ? PprDeduction(input.SpousePprContributions, input.SpouseAge) : 0m);
+            + (input.FilingStatus == IrsFilingStatus.Joint ? PprDeduction(input.SpousePprContributions, input.SpouseAge) : 0m);
 
         var deductionLimit = taxablePerPerson <= 8342m
             ? decimal.MaxValue
@@ -222,7 +222,7 @@ public sealed class IrsCalculator
 
     private static decimal CalculateAutonomousTax(IrsScenarioInput input)
     {
-        var capitalRate = input.Region == "acores" ? 0.196m : 0.28m;
+        var capitalRate = input.Region == IrsRegion.Acores ? 0.196m : 0.28m;
         var tax = 0m;
         if (!input.AggregateInvestmentIncome)
         {

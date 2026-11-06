@@ -6,9 +6,9 @@ public sealed class TrackedAsset
     public Guid OwnerId { get; set; }
     public string Symbol { get; set; } = "";
     public string Name { get; set; } = "";
-    public string Currency { get; set; } = "";
+    public TradeCurrency Currency { get; set; }
     public decimal? CurrentPrice { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public ICollection<Trade> Trades { get; set; } = new List<Trade>();
+    public ICollection<Trade> Trades { get; set; } = [];
 }

@@ -13,7 +13,7 @@ import {
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import type { AuthUser } from "@/features/auth/api";
-import { tradeTrackerApi, type Trade, type TrackedAsset } from "./api";
+import { tradeTrackerApi, TradeSide, type Trade, type TrackedAsset } from "./api";
 import { AddAssetDialog } from "./AddAssetDialog";
 import { ImportTradesDialog } from "./ImportTradesDialog";
 import { AppNavbar } from "@/shared/ui/AppNavbar";
@@ -118,12 +118,17 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
   function submitTrade(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const sideValue = String(form.get("side"));
+    if (sideValue !== TradeSide.Buy && sideValue !== TradeSide.Sell) {
+      toast.error("Choose Buy or Sell.");
+      return;
+    }
     const tradedAt = recordNow
       ? new Date().toISOString()
       : new Date(String(form.get("tradedAt"))).toISOString();
     addTrade.mutate({
       assetId: String(form.get("assetId")),
-      side: String(form.get("side")) === "Sell" ? "Sell" : "Buy",
+      side: sideValue === TradeSide.Sell ? TradeSide.Sell : TradeSide.Buy,
       quantity: Number(form.get("quantity")),
       unitPrice: Number(form.get("unitPrice")),
       fees: Number(form.get("fees") || 0),
@@ -390,9 +395,9 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
               </select>
             </Field>
             <Field label="Side">
-              <select className="field mt-1" name="side" defaultValue="Buy">
-                <option value="Buy">Buy</option>
-                <option value="Sell">Sell</option>
+              <select className="field mt-1" name="side" defaultValue={TradeSide.Buy}>
+                <option value={TradeSide.Buy}>Buy</option>
+                <option value={TradeSide.Sell}>Sell</option>
               </select>
             </Field>
             <Field label="Quantity">
@@ -662,9 +667,9 @@ export function TradeTrackerPage({ user }: { user: AuthUser }) {
                         </td>
                         <td className="py-3 pr-4">
                           <span
-                            className={`inline-flex items-center gap-1 ${trade.side === "Buy" ? "text-mint" : "text-rose"}`}
+                            className={`inline-flex items-center gap-1 ${trade.side === TradeSide.Buy ? "text-mint" : "text-rose"}`}
                           >
-                            {trade.side === "Buy" ? (
+                            {trade.side === TradeSide.Buy ? (
                               <ArrowDownRight className="size-3.5" />
                             ) : (
                               <ArrowUpRight className="size-3.5" />

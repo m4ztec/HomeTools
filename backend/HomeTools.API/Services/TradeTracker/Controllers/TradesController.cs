@@ -48,7 +48,7 @@ public sealed partial class TradesController(
             OwnerId = ownerId,
             Symbol = symbol,
             Name = string.IsNullOrWhiteSpace(request.Name) ? symbol : request.Name.Trim(),
-            Currency = request.Currency.Trim().ToUpperInvariant(),
+            Currency = request.Currency,
         };
         db.TrackedAssets.Add(asset);
         await db.SaveChangesAsync();
@@ -157,13 +157,13 @@ public sealed partial class TradesController(
             if (assetsBySymbol.TryGetValue(symbol, out var existingAsset))
             {
                 asset = existingAsset;
-                if (!string.Equals(asset.Currency, imported.Currency.Trim(), StringComparison.OrdinalIgnoreCase))
+                if (asset.Currency != imported.Currency)
                     return BadRequest(new { message = $"Row {row}: {symbol} is already tracked in {asset.Currency}." });
             }
             else if (newAssetsBySymbol.TryGetValue(symbol, out var newAsset))
             {
                 asset = newAsset;
-                if (!string.Equals(asset.Currency, imported.Currency.Trim(), StringComparison.OrdinalIgnoreCase))
+                if (asset.Currency != imported.Currency)
                     return BadRequest(new { message = $"Row {row}: {symbol} has conflicting currencies in the CSV." });
                 if (asset.Name == symbol && !string.IsNullOrWhiteSpace(imported.Name))
                     asset.Name = imported.Name.Trim();
@@ -175,7 +175,7 @@ public sealed partial class TradesController(
                     OwnerId = ownerId,
                     Symbol = symbol,
                     Name = string.IsNullOrWhiteSpace(imported.Name) ? symbol : imported.Name.Trim(),
-                    Currency = imported.Currency.Trim().ToUpperInvariant(),
+                    Currency = imported.Currency,
                     UpdatedAt = now,
                 };
                 newAssetsBySymbol.Add(symbol, asset);
@@ -285,8 +285,7 @@ public sealed partial class TradesController(
         if (!SymbolPattern().IsMatch(symbol))
             return "Symbol may contain 1–20 letters, numbers, periods, underscores, or hyphens.";
         if (request.Name?.Trim().Length > 80) return "Asset name must be 80 characters or fewer.";
-        if (!request.Currency.Trim().Equals("EUR", StringComparison.OrdinalIgnoreCase)
-            && !request.Currency.Trim().Equals("USD", StringComparison.OrdinalIgnoreCase))
+        if (request.Currency is not (TradeCurrency.EUR or TradeCurrency.USD))
             return "Currency must be EUR or USD.";
         return null;
     }
@@ -294,7 +293,7 @@ public sealed partial class TradesController(
     private static string? Validate(CreateTradeRequest request)
     {
         if (request.AssetId == Guid.Empty) return "Choose a tracked asset.";
-        if (request.Side is not ("Buy" or "Sell")) return "Trade side must be Buy or Sell.";
+        if (request.Side is not (TradeSide.Buy or TradeSide.Sell)) return "Trade side must be Buy or Sell.";
         if (request.Quantity <= 0 || request.Quantity > MaximumAmount)
             return "Quantity must be greater than zero and within the supported range.";
         if (request.UnitPrice <= 0 || request.UnitPrice > MaximumAmount)
@@ -353,7 +352,7 @@ public sealed partial class TradesController(
         IReadOnlyDictionary<Guid, decimal> realizedByTrade)
     {
         decimal? realizedProfitLoss =
-            trade.Side == "Sell" && realizedByTrade.TryGetValue(trade.Id, out var value)
+            trade.Side == TradeSide.Sell && realizedByTrade.TryGetValue(trade.Id, out var value)
                 ? value
                 : null;
         return new(
@@ -383,14 +382,14 @@ public sealed partial class TradesController(
             .ThenBy(value => value.CreatedAt)
             .ThenBy(value => value.Id))
         {
-            if (trade.Side == "Buy")
+            if (trade.Side == TradeSide.Buy)
             {
                 quantity += trade.Quantity;
                 costBasis += trade.Quantity * trade.UnitPrice + trade.Fees;
                 continue;
             }
 
-            if (trade.Side != "Sell")
+            if (trade.Side != TradeSide.Sell)
                 return LedgerResult.Invalid($"Trade {trade.Id} has an unsupported side.");
             if (trade.Quantity > quantity)
                 return LedgerResult.Invalid($"A sale on {trade.TradedAt:yyyy-MM-dd} exceeds the position available at that time.");

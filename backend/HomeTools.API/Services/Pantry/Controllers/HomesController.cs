@@ -47,7 +47,7 @@ public sealed class HomesController(
             Name = name,
             CreatedBy = CurrentUserId(),
         };
-        home.Members.Add(new HomeMember { Home = home, UserId = home.CreatedBy, Role = "owner" });
+        home.Members.Add(new HomeMember { Home = home, UserId = home.CreatedBy, Role = HomeMemberRole.Owner });
         db.Homes.Add(home);
         await db.SaveChangesAsync();
         return Ok(ToDto(home));
@@ -60,7 +60,7 @@ public sealed class HomesController(
     {
         var userId = CurrentUserId();
         var isOwner = await db.HomeMembers.AnyAsync(member =>
-            member.HomeId == homeId && member.UserId == userId && member.Role == "owner");
+            member.HomeId == homeId && member.UserId == userId && member.Role == HomeMemberRole.Owner);
         if (!isOwner) return NotFound();
 
         var email = request.Email.Trim();
@@ -164,7 +164,7 @@ public sealed class HomesController(
             {
                 HomeId = invitation.HomeId,
                 UserId = userId,
-                Role = "member",
+                Role = HomeMemberRole.Member,
             });
             await db.SaveChangesAsync();
         }
@@ -203,7 +203,7 @@ public sealed class HomesController(
         var home = await db.Homes.SingleOrDefaultAsync(value => value.Id == homeId);
         if (home is null) return NotFound();
         if (!await db.HomeMembers.AnyAsync(member =>
-                member.HomeId == homeId && member.UserId == CurrentUserId() && member.Role == "owner"))
+                member.HomeId == homeId && member.UserId == CurrentUserId() && member.Role == HomeMemberRole.Owner))
         {
             return Forbid();
         }

@@ -42,7 +42,7 @@ public sealed class AdminController(
             .Select(home => new
             {
                 Home = home,
-                Owner = home.Members.Where(member => member.Role == "owner").Select(member => member.User.DisplayName).FirstOrDefault(),
+                Owner = home.Members.Where(member => member.Role == HomeMemberRole.Owner).Select(member => member.User.DisplayName).FirstOrDefault(),
                 MemberCount = home.Members.Count,
                 ItemCount = home.Items.Count,
             })

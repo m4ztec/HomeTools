@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,10 @@ namespace HomeTools.API.Services.Irs.Controllers;
 [Route("api/irs/scenarios")]
 public sealed class IrsScenariosController(HomeToolsDbContext db, IrsCalculator calculator) : ControllerBase
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) },
+    };
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<IrsScenarioDto>>> List()

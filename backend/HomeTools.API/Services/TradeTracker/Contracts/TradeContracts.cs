@@ -1,10 +1,12 @@
+using HomeTools.API.Services.TradeTracker.Models;
+
 namespace HomeTools.API.Services.TradeTracker.Contracts;
 
-public sealed record CreateTrackedAssetRequest(string Symbol, string? Name, string Currency);
+public sealed record CreateTrackedAssetRequest(string Symbol, string? Name, TradeCurrency Currency);
 
 public sealed record CreateTradeRequest(
     Guid AssetId,
-    string Side,
+    TradeSide Side,
     decimal Quantity,
     decimal UnitPrice,
     decimal Fees,
@@ -14,8 +16,8 @@ public sealed record CreateTradeRequest(
 public sealed record ImportTradeRequest(
     string Symbol,
     string? Name,
-    string Currency,
-    string Side,
+    TradeCurrency Currency,
+    TradeSide Side,
     decimal Quantity,
     decimal UnitPrice,
     decimal Fees,
@@ -33,8 +35,8 @@ public sealed record TradeDto(
     Guid AssetId,
     string Symbol,
     string Name,
-    string Currency,
-    string Side,
+    TradeCurrency Currency,
+    TradeSide Side,
     decimal Quantity,
     decimal UnitPrice,
     decimal Fees,
@@ -46,7 +48,7 @@ public sealed record TrackedAssetDto(
     Guid Id,
     string Symbol,
     string Name,
-    string Currency,
+    TradeCurrency Currency,
     decimal? CurrentPrice,
     decimal Quantity,
     decimal AverageCost,

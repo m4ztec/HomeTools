@@ -1,14 +1,75 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HomeTools.API.Services.Irs.Contracts;
 
+public enum IrsRegion
+{
+    Continente,
+    Madeira,
+    Acores,
+}
+
+public enum IrsFilingStatus
+{
+    Single,
+    Joint,
+    Separate,
+    SingleParent,
+}
+
+[JsonConverter(typeof(IrsYouthTaxReliefYearJsonConverter))]
+public enum IrsYouthTaxReliefYear
+{
+    Year1 = 1,
+    Year2,
+    Year3,
+    Year4,
+    Year5,
+    Year6,
+    Year7,
+    Year8,
+    Year9,
+    Year10,
+}
+
+public sealed class IrsYouthTaxReliefYearJsonConverter : JsonConverter<IrsYouthTaxReliefYear>
+{
+    public override IrsYouthTaxReliefYear Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String
+            && Enum.TryParse<IrsYouthTaxReliefYear>(reader.GetString(), out var parsed)
+            && Enum.IsDefined(parsed))
+        {
+            return parsed;
+        }
+
+        if (reader.TokenType == JsonTokenType.Number
+            && reader.TryGetInt32(out var legacyValue)
+            && Enum.IsDefined((IrsYouthTaxReliefYear)legacyValue))
+        {
+            return (IrsYouthTaxReliefYear)legacyValue;
+        }
+
+        throw new JsonException("Youth tax relief year must be Year1 through Year10.");
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        IrsYouthTaxReliefYear value,
+        JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.ToString());
+}
+
 public sealed class IrsScenarioInput
 {
-    [Required, RegularExpression("^(continente|madeira|acores)$")]
-    public string Region { get; set; } = "continente";
+    public IrsRegion Region { get; set; } = IrsRegion.Continente;
 
-    [Required, RegularExpression("^(single|joint|separate|singleParent)$")]
-    public string FilingStatus { get; set; } = "single";
+    public IrsFilingStatus FilingStatus { get; set; } = IrsFilingStatus.Single;
 
     [Range(18, 100)]
     public int Age { get; set; } = 35;
@@ -30,7 +91,7 @@ public sealed class IrsScenarioInput
     [Range(0, 100_000_000)] public decimal PensionIncome { get; set; }
     [Range(0, 100_000_000)] public decimal SpousePensionIncome { get; set; }
     public bool ApplyYouthTaxRelief { get; set; }
-    [Range(1, 10)] public int YouthTaxReliefYear { get; set; } = 1;
+    public IrsYouthTaxReliefYear YouthTaxReliefYear { get; set; } = IrsYouthTaxReliefYear.Year1;
 
     [Range(0, 100_000_000)] public decimal Dividends { get; set; }
     [Range(0, 100_000_000)] public decimal Interest { get; set; }

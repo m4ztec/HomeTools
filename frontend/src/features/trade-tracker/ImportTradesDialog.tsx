@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Download, Upload, X } from "lucide-react";
 import { useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
-import { tradeTrackerApi, type ImportTradeInput } from "./api";
+import { tradeTrackerApi, TradeCurrency, TradeSide, type ImportTradeInput } from "./api";
 
 const CSV_TEMPLATE =
   "symbol,name,currency,side,quantity,unitPrice,fees,tradedAt,notes\r\n" +
@@ -66,7 +66,7 @@ function parseCsv(text: string): string[][] {
   return records;
 }
 
-function parseTrades(text: string, defaultCurrency: string): PreviewRow[] {
+function parseTrades(text: string, defaultCurrency: TradeCurrency): PreviewRow[] {
   const [headerRow, ...dataRows] = parseCsv(text);
   if (!headerRow) throw new Error("The CSV is empty.");
   const headers = headerRow.map((value) => {
@@ -89,7 +89,8 @@ function parseTrades(text: string, defaultCurrency: string): PreviewRow[] {
   return dataRows.map((values, index) => {
     const line = index + 2;
     const rawSide = column(values, "side").toLowerCase();
-    const side = rawSide === "buy" ? "Buy" : rawSide === "sell" ? "Sell" : "";
+    const side =
+      rawSide === "buy" ? TradeSide.Buy : rawSide === "sell" ? TradeSide.Sell : undefined;
     const rawQuantity = column(values, "quantity");
     const quantityFraction = /^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/.exec(rawQuantity);
     const quantity = Number(quantityFraction ? quantityFraction[1] : rawQuantity);
@@ -103,13 +104,15 @@ function parseTrades(text: string, defaultCurrency: string): PreviewRow[] {
         ? new Date(EXCEL_EPOCH + excelDate * 86_400_000)
         : new Date(tradedAtText);
     const symbol = column(values, "symbol").toUpperCase();
-    const currency = (column(values, "currency") || defaultCurrency).toUpperCase();
+    const currencyText = (column(values, "currency") || defaultCurrency).toUpperCase();
+    const currency = currencyText === TradeCurrency.USD ? TradeCurrency.USD : TradeCurrency.EUR;
     const name = column(values, "name");
     const notes = column(values, "notes");
     let error: string | undefined;
 
     if (!/^[A-Z0-9.^_-]{1,20}$/.test(symbol)) error = "Invalid symbol.";
-    else if (currency !== "EUR" && currency !== "USD") error = "Currency must be EUR or USD.";
+    else if (currencyText !== TradeCurrency.EUR && currencyText !== TradeCurrency.USD)
+      error = "Currency must be EUR or USD.";
     else if (!side) error = 'Side must be "Buy" or "Sell".';
     else if (!Number.isFinite(quantity) || quantity <= 0 || quantity > 9_999_999_999)
       error = "Quantity must be greater than zero.";
@@ -142,7 +145,7 @@ function parseTrades(text: string, defaultCurrency: string): PreviewRow[] {
         symbol,
         name: name || null,
         currency,
-        side: side || "Buy",
+        side: side ?? TradeSide.Buy,
         quantity,
         unitPrice,
         fees,
@@ -159,7 +162,7 @@ export function ImportTradesDialog({ onClose }: { onClose: () => void }) {
   const [rows, setRows] = useState<PreviewRow[]>([]);
   const [fileError, setFileError] = useState("");
   const [fileName, setFileName] = useState("");
-  const [defaultCurrency, setDefaultCurrency] = useState("EUR");
+  const [defaultCurrency, setDefaultCurrency] = useState(TradeCurrency.EUR);
   const [csvText, setCsvText] = useState("");
   const invalidRows = rows.filter((row) => row.error);
   const importTrades = useMutation({
@@ -262,10 +265,12 @@ export function ImportTradesDialog({ onClose }: { onClose: () => void }) {
             value={defaultCurrency}
             onChange={(event) => {
               const value = event.currentTarget.value;
-              setDefaultCurrency(value);
+              if (value !== TradeCurrency.EUR && value !== TradeCurrency.USD) return;
+              const currency = value === TradeCurrency.USD ? TradeCurrency.USD : TradeCurrency.EUR;
+              setDefaultCurrency(currency);
               if (!csvText) return;
               try {
-                setRows(parseTrades(csvText, value));
+                setRows(parseTrades(csvText, currency));
                 setFileError("");
               } catch (error) {
                 setRows([]);
@@ -275,8 +280,8 @@ export function ImportTradesDialog({ onClose }: { onClose: () => void }) {
               }
             }}
           >
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
+            <option value={TradeCurrency.EUR}>EUR</option>
+            <option value={TradeCurrency.USD}>USD</option>
           </select>
         </label>
 

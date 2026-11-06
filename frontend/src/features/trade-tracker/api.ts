@@ -1,14 +1,24 @@
 import { apiRequest } from "@/shared/lib/api-client";
 
+export enum TradeSide {
+  Buy = "Buy",
+  Sell = "Sell",
+}
+
+export enum TradeCurrency {
+  EUR = "EUR",
+  USD = "USD",
+}
+
 export type AssetInput = {
   symbol: string;
   name: string;
-  currency: string;
+  currency: TradeCurrency;
 };
 
 export type TradeInput = {
   assetId: string;
-  side: "Buy" | "Sell";
+  side: TradeSide;
   quantity: number;
   unitPrice: number;
   fees: number;
@@ -19,7 +29,7 @@ export type TradeInput = {
 export type ImportTradeInput = Omit<TradeInput, "assetId" | "notes"> & {
   symbol: string;
   name: string | null;
-  currency: string;
+  currency: TradeCurrency;
   notes: string | null;
 };
 
@@ -28,8 +38,8 @@ export type Trade = {
   assetId: string;
   symbol: string;
   name: string;
-  currency: string;
-  side: "Buy" | "Sell";
+  currency: TradeCurrency;
+  side: TradeSide;
   quantity: number;
   unitPrice: number;
   fees: number;
@@ -42,7 +52,7 @@ export type TrackedAsset = {
   id: string;
   symbol: string;
   name: string;
-  currency: string;
+  currency: TradeCurrency;
   currentPrice: number | null;
   quantity: number;
   averageCost: number;

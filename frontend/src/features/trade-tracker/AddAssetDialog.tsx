@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, type FormEvent } from "react";
 import { toast } from "sonner";
-import { tradeTrackerApi, type TrackedAsset } from "./api";
+import { tradeTrackerApi, TradeCurrency, type TrackedAsset } from "./api";
 
 export function AddAssetDialog({
   onClose,
@@ -26,10 +26,15 @@ export function AddAssetDialog({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const currency = String(form.get("currency"));
+    if (currency !== TradeCurrency.EUR && currency !== TradeCurrency.USD) {
+      toast.error("Choose EUR or USD.");
+      return;
+    }
     addAsset.mutate({
       symbol: String(form.get("symbol")).trim().toUpperCase(),
       name: String(form.get("name")).trim(),
-      currency: String(form.get("currency")).trim().toUpperCase(),
+      currency,
     });
   }
 
@@ -62,9 +67,9 @@ export function AddAssetDialog({
         </label>
         <label className="block text-sm">
           <span className="text-xs text-mist">Currency</span>
-          <select className="field mt-1" name="currency" defaultValue="EUR" required>
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
+          <select className="field mt-1" name="currency" defaultValue={TradeCurrency.EUR} required>
+            <option value={TradeCurrency.EUR}>EUR</option>
+            <option value={TradeCurrency.USD}>USD</option>
           </select>
         </label>
         <div className="flex justify-end gap-2 pt-1">

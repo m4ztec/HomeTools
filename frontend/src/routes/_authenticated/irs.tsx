@@ -4,10 +4,11 @@ import { Calculator, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
+  IrsFilingStatus,
+  IrsRegion,
+  IrsYouthTaxReliefYear,
   irsApi,
   type IrsCalculationResult,
-  type IrsFilingStatus,
-  type IrsRegion,
   type IrsScenario,
   type IrsScenarioInput,
 } from "@/features/irs/api";
@@ -24,8 +25,8 @@ export const Route = createFileRoute("/_authenticated/irs")({
 });
 
 const emptyInput: IrsScenarioInput = {
-  region: "continente",
-  filingStatus: "single",
+  region: IrsRegion.Continente,
+  filingStatus: IrsFilingStatus.Single,
   age: 35,
   spouseAge: 35,
   dependents: 0,
@@ -42,7 +43,7 @@ const emptyInput: IrsScenarioInput = {
   pensionIncome: 0,
   spousePensionIncome: 0,
   applyYouthTaxRelief: false,
-  youthTaxReliefYear: 1,
+  youthTaxReliefYear: IrsYouthTaxReliefYear.Year1,
   dividends: 0,
   interest: 0,
   residentialRent: 0,
@@ -61,6 +62,19 @@ const emptyInput: IrsScenarioInput = {
   spousePprContributions: 0,
   withholdingAndPayments: 0,
 };
+
+const youthTaxReliefYears = [
+  IrsYouthTaxReliefYear.Year1,
+  IrsYouthTaxReliefYear.Year2,
+  IrsYouthTaxReliefYear.Year3,
+  IrsYouthTaxReliefYear.Year4,
+  IrsYouthTaxReliefYear.Year5,
+  IrsYouthTaxReliefYear.Year6,
+  IrsYouthTaxReliefYear.Year7,
+  IrsYouthTaxReliefYear.Year8,
+  IrsYouthTaxReliefYear.Year9,
+  IrsYouthTaxReliefYear.Year10,
+];
 
 type NumericField = {
   [Key in keyof IrsScenarioInput]: IrsScenarioInput[Key] extends number ? Key : never;
@@ -201,13 +215,16 @@ function IrsPage() {
                     className="field mt-1"
                     value={input.region}
                     onChange={(event) => {
-                      setInput({ ...input, region: event.target.value as IrsRegion });
+                      const region = Object.values(IrsRegion).find(
+                        (value) => value === event.currentTarget.value,
+                      );
+                      if (region) setInput({ ...input, region });
                       setDirty(true);
                     }}
                   >
-                    <option value="continente">Continente</option>
-                    <option value="madeira">Madeira</option>
-                    <option value="acores">Açores</option>
+                    <option value={IrsRegion.Continente}>Continente</option>
+                    <option value={IrsRegion.Madeira}>Madeira</option>
+                    <option value={IrsRegion.Acores}>Açores</option>
                   </select>
                 </label>
                 <label className="text-sm">
@@ -216,11 +233,14 @@ function IrsPage() {
                     className="field mt-1"
                     value={input.filingStatus}
                     onChange={(event) => {
-                      const filingStatus = event.target.value as IrsFilingStatus;
+                      const filingStatus = Object.values(IrsFilingStatus).find(
+                        (value) => value === event.currentTarget.value,
+                      );
+                      if (!filingStatus) return;
                       setInput({
                         ...input,
                         filingStatus,
-                        ...(filingStatus === "joint"
+                        ...(filingStatus === IrsFilingStatus.Joint
                           ? {}
                           : {
                               spouseEmploymentIncome: 0,
@@ -232,10 +252,10 @@ function IrsPage() {
                       setDirty(true);
                     }}
                   >
-                    <option value="single">Single / not married</option>
-                    <option value="joint">Joint taxation</option>
-                    <option value="separate">Married, separate taxation</option>
-                    <option value="singleParent">Single-parent household</option>
+                    <option value={IrsFilingStatus.Single}>Single / not married</option>
+                    <option value={IrsFilingStatus.Joint}>Joint taxation</option>
+                    <option value={IrsFilingStatus.Separate}>Married, separate taxation</option>
+                    <option value={IrsFilingStatus.SingleParent}>Single-parent household</option>
                   </select>
                 </label>
               </div>
@@ -248,7 +268,7 @@ function IrsPage() {
                   max={100}
                   onChange={changeNumber}
                 />
-                {input.filingStatus === "joint" && (
+                {input.filingStatus === IrsFilingStatus.Joint && (
                   <NumberField
                     label="Spouse age"
                     field="spouseAge"
@@ -310,7 +330,7 @@ function IrsPage() {
                   value={input.employmentIncome}
                   onChange={changeNumber}
                 />
-                {input.filingStatus === "joint" && (
+                {input.filingStatus === IrsFilingStatus.Joint && (
                   <NumberField
                     label="Spouse employment income (€)"
                     field="spouseEmploymentIncome"
@@ -334,7 +354,7 @@ function IrsPage() {
                       value={input.socialSecurityContributions}
                       onChange={changeNumber}
                     />
-                    {input.filingStatus === "joint" && (
+                    {input.filingStatus === IrsFilingStatus.Joint && (
                       <NumberField
                         label="Spouse Social Security contributions (€)"
                         field="spouseSocialSecurityContributions"
@@ -356,7 +376,7 @@ function IrsPage() {
                   value={input.pensionIncome}
                   onChange={changeNumber}
                 />
-                {input.filingStatus === "joint" && (
+                {input.filingStatus === IrsFilingStatus.Joint && (
                   <NumberField
                     label="Spouse pension income (€)"
                     field="spousePensionIncome"
@@ -379,13 +399,19 @@ function IrsPage() {
                   <select
                     className="field mt-1"
                     value={input.youthTaxReliefYear}
-                    onChange={(event) =>
-                      changeNumber("youthTaxReliefYear", Number(event.target.value))
-                    }
+                    onChange={(event) => {
+                      const year = youthTaxReliefYears.find(
+                        (value) => value === event.currentTarget.value,
+                      );
+                      if (year !== undefined) {
+                        setInput({ ...input, youthTaxReliefYear: year });
+                        setDirty(true);
+                      }
+                    }}
                   >
-                    {Array.from({ length: 10 }, (_, index) => (
-                      <option key={index + 1} value={index + 1}>
-                        Year {index + 1}
+                    {youthTaxReliefYears.map((year) => (
+                      <option key={year} value={year}>
+                        Year {year.slice(4)}
                       </option>
                     ))}
                   </select>
@@ -441,7 +467,7 @@ function IrsPage() {
                       onChange={changeNumber}
                     />
                   ))}
-                {input.filingStatus === "joint" && (
+                {input.filingStatus === IrsFilingStatus.Joint && (
                   <NumberField
                     label="Spouse PPR contributions (€)"
                     field="spousePprContributions"

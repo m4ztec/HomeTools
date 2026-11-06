@@ -2,6 +2,12 @@ using HomeTools.API.Services.Authentication;
 
 namespace HomeTools.API.Services.Pantry.Models;
 
+public enum HomeMemberRole
+{
+    Member,
+    Owner,
+}
+
 public sealed class Home
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -32,7 +38,7 @@ public sealed class HomeMember
 {
     public Guid HomeId { get; set; }
     public Guid UserId { get; set; }
-    public string Role { get; set; } = "member";
+    public HomeMemberRole Role { get; set; } = HomeMemberRole.Member;
     public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
     public Home Home { get; set; } = null!;
     public HomeToolsUser User { get; set; } = null!;

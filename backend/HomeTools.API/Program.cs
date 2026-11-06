@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -6,6 +8,7 @@ using HomeTools.API.Services.Authentication;
 using HomeTools.API.Services.Irs.Services;
 using HomeTools.API.Data;
 using HomeTools.API.Services.Pantry.Models;
+using HomeTools.API.Services.TradeTracker.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,7 @@ if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32
 
 builder.Services.AddDbContext<HomeToolsDbContext>(options =>
     options.UseSqlite(connectionString));
+    
 builder.Services
     .AddIdentityCore<HomeToolsUser>(options =>
     {
@@ -53,7 +57,15 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IrsCalculator>();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter<TradeSide>(namingPolicy: null, allowIntegerValues: false));
+    options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter<TradeCurrency>(namingPolicy: null, allowIntegerValues: false));
+    options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false));
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>

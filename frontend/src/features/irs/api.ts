@@ -1,7 +1,30 @@
 import { apiRequest } from "@/shared/lib/api-client";
 
-export type IrsRegion = "continente" | "madeira" | "acores";
-export type IrsFilingStatus = "single" | "joint" | "separate" | "singleParent";
+export enum IrsRegion {
+  Continente = "continente",
+  Madeira = "madeira",
+  Acores = "acores",
+}
+
+export enum IrsFilingStatus {
+  Single = "single",
+  Joint = "joint",
+  Separate = "separate",
+  SingleParent = "singleParent",
+}
+
+export enum IrsYouthTaxReliefYear {
+  Year1 = "Year1",
+  Year2 = "Year2",
+  Year3 = "Year3",
+  Year4 = "Year4",
+  Year5 = "Year5",
+  Year6 = "Year6",
+  Year7 = "Year7",
+  Year8 = "Year8",
+  Year9 = "Year9",
+  Year10 = "Year10",
+}
 
 export type IrsScenarioInput = {
   region: IrsRegion;
@@ -22,7 +45,7 @@ export type IrsScenarioInput = {
   pensionIncome: number;
   spousePensionIncome: number;
   applyYouthTaxRelief: boolean;
-  youthTaxReliefYear: number;
+  youthTaxReliefYear: IrsYouthTaxReliefYear;
   dividends: number;
   interest: number;
   residentialRent: number;

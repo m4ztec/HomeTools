@@ -27,7 +27,7 @@ public sealed record HomeInvitationPreviewDto(
     [property: JsonPropertyName("expires_at")] DateTimeOffset ExpiresAt);
 public sealed record MemberDto(
     [property: JsonPropertyName("user_id")] Guid UserId,
-    string Role,
+    HomeMemberRole Role,
     [property: JsonPropertyName("display_name")] string DisplayName);
 public sealed record ItemDto(
     Guid Id,

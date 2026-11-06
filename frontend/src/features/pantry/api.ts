@@ -8,7 +8,11 @@ import type {
   ItemInput,
 } from "./model";
 
-export type Member = { user_id: string; role: string; display_name: string };
+export enum HomeMemberRole {
+  Member = "member",
+  Owner = "owner",
+}
+export type Member = { user_id: string; role: HomeMemberRole; display_name: string };
 export type AdminUser = {
   id: string;
   email: string;
